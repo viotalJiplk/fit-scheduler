@@ -231,11 +231,12 @@ function processFetchedSubjectData(sub, data) {
                     lesson.rooms.push($(a).text().trim());
                 });
 
-                // Combine rooms (implement room combination logic)
-                lesson.rooms = combineRooms(lesson.rooms);
+                // Combine rooms
+                const origRooms = lesson.rooms;
+                lesson.rooms = combineRooms(origRooms);
 
                 // Generate ID
-                lesson.id = 'LOAD_' + makeHash(lesson.name + ';' + lesson.day + ';' + lesson.week + ';' + lesson.from + ';' + lesson.to + ';' + lesson.type + ';' + JSON.stringify(lesson.rooms));
+                lesson.id = 'LOAD_' + makeHash(lesson.name + ';' + lesson.day + ';' + lesson.week + ';' + lesson.from + ';' + lesson.to + ';' + lesson.type + ';' + JSON.stringify(origRooms));
 
                 lessons.push(lesson);
             }
@@ -294,8 +295,11 @@ function parseStudiesData(htmlData, year, callback) {
 
         // Parse years
         $('select#year').find('option').each((i, opt) => {
+            const val = Number($(opt).attr('value')); 
+            // No timetable data on the website for years <2024 anyway
+            if (val < 2024) return;
             years.push({
-                value: Number($(opt).attr('value')),
+                value: val,
                 name: $(opt).text()
             });
         });
@@ -468,13 +472,15 @@ function getLessonType(typeHtml) {
 }
 
 function combineRooms(rooms) {
-    // Implement room combination logic from your original code
-    // For example:
-    if (rooms.includes("E112") && rooms.includes("E104") && rooms.includes("E105")) {
+    if (rooms.includes("E112") && (rooms.includes("E104") || rooms.includes("E105"))) {
         rooms = rooms.filter(x => x !== "E112" && x !== "E104" && x !== "E105");
         rooms.push("E112+4,5");
     }
-    // Add other combinations as needed
+
+    if (rooms.includes("D105") && (rooms.includes("D0206") || rooms.includes("D0207"))) {
+        rooms = rooms.filter(x => x !== "D105" && x !== "D0206" && x !== "D0207");
+        rooms.push("D105+dole");
+    }
     return rooms;
 }
 
@@ -514,7 +520,6 @@ function parseRanges(rangeHtml, subjectName, subjectLink) {
         greenRange: greenRange,
         blueRange: blueRange,
         yellowRange: yellowRange
-        // Add more properties if needed
     };
 
     ranges.push(range);
@@ -522,9 +527,8 @@ function parseRanges(rangeHtml, subjectName, subjectLink) {
 }
 
 function getSemesterWeekFromDate(date) {
-    // Adjusted to include more years and avoid errors
-    var winterStart = { 2022: "2022-09-19", 2023: "2023-09-18", 2024: "2024-09-16" };
-    var summerStart = { 2023: "2023-02-06", 2024: "2024-02-05", 2025: "2025-02-03" };
+    var winterStart = { 2022: "2022-09-19", 2023: "2023-09-18", 2024: "2024-09-16", 2025: "2025-09-15" };
+    var summerStart = { 2023: "2023-02-06", 2024: "2024-02-05", 2025: "2025-02-10", 2026: "2026-02-09" };
     var dateWeek = getWeekNumber(date);
     var year = date.getFullYear();
     var winterStartWeek = getWeekNumber(new Date(winterStart[year]));
