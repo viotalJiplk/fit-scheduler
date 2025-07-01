@@ -975,9 +975,11 @@ function makeFile() {
 } // checked
 async function restoreFile() {
     // Year
-    if (file.year) {
+    if (file.year && year != file.year) {
         year = file.year;
         $(".year_select").val(year);
+        studies = subjects = lastLoadedSubjects = ranges = lessons = [];
+        await loadData();
     }
 
     // Sem
