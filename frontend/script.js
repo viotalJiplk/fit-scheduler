@@ -1,8 +1,282 @@
+/////////////////////////////////// Classes ////////////////////////////////////
+
+/**
+ * @typedef {"summer" | "winter" } Semester
+ */
+
+class Subject{
+    /**
+     * @param {string} name 
+     * @param {Semester} sem 
+     * @param {string} link 
+     */
+    constructor(name, sem, link){
+        this.name = name;
+        this.sem = sem;
+        this.link = link;
+    }
+}
+
+/**
+ * Attempts to parse object to Subject
+ * @param {any} object 
+ */
+function parseSubject(object){
+    if(("link" in object) && (typeof object.link === "string")
+        && ("name" in object) && (typeof object.name === "string")
+        && ("sem" in object) && ((object.sem === "winter") || (object.sem === "summer"))
+    ){
+        return new Subject(object.name, object.sem, object.link);
+    }else{
+        throw new Error(`Subject missing params or params are wrong type`);
+    }
+}
+
+class Study{
+    /**
+     * @param {string} link 
+     * @param {string} name
+     * @param {Subject[][]} com
+     * @param {Subject[][]} opt
+     */
+    constructor(link, name, com, opt){
+        this.link = link;
+        this.name = name;
+        this.subjects = {
+            "com": com,
+            "opt": opt
+        }
+    }
+}
+/**
+ * Attempts to parse object to study
+ * @param {any} object 
+ */
+function parseStudy(object){
+    if(object
+        &&("link" in object)&&(typeof object.link === "string")
+        &&("name" in object)&&(typeof object.name === "string")
+        &&("subjects" in object) && (typeof object.subjects === "object")
+    ){
+        /**@type {Subject[][]} */
+        const compulsorySubjects = [];
+        if("com" in object.subjects){
+            if(Array.isArray(object.subjects.com)){
+                for(const grade of object.subjects.com){
+                    if(Array.isArray(grade)){
+                        compulsorySubjects.push([]);
+                        for(const subject of grade){
+                            compulsorySubjects[compulsorySubjects.length-1].push(parseSubject(subject));
+                        }
+                    }else{
+                        throw new Error("Wrong type of grade");
+                    }
+                }
+            }else{
+                throw new Error("Wrong type of compulsory subjects");
+            }
+        }
+        /**@type {Subject[][]} */
+        const optionalSubjects = [];
+        if("opt" in object.subjects){
+            if(Array.isArray(object.subjects.opt)){
+                for(const grade of object.subjects.opt){
+                    optionalSubjects.push([]);
+                    if(Array.isArray(grade)){
+                        for(const subject of grade){
+                            optionalSubjects[optionalSubjects.length-1].push(parseSubject(subject));
+                        }
+                    }else{
+                        throw new Error("Wrong type of grade");
+                    }
+                }
+            }else{
+                throw new Error("Wrong type of compulsory subjects");
+            }
+        }
+        return new Study(object.link, object.name, compulsorySubjects, optionalSubjects);
+    }else{
+        throw new Error(`Study missing params or params are wrong type`);
+    }
+}
+
+class Year{
+    /**
+     * @param {string} name 
+     * @param {number} value 
+     */
+    constructor(name, value){
+        this.name = name;
+        this.value = value;
+    }
+}
+
+/**
+ * Attempts to parse object to Year
+ * @param {any} object 
+ */
+function parseYear(object){
+    if(object
+        &&("name" in object)&&(typeof object.name === "string")
+        &&("value" in object)&&(typeof object.value === "number")
+    ){
+        return new Year(object.name, object.value);
+    }else{
+        throw new Error(`Years missing params or params are wrong type`);
+    }
+}
+
+/**
+ * @typedef {"green" | "blue" | "yellow" | "darkblue"
+ * | "purple" | "red" | "orange"| "brown" | "gray"
+ * | "white"} LessonColors
+ */
+
+class Lesson {
+    /**
+     * @param {string} id
+     * @param {string} name
+     * @param {string} link
+     * @param {number} day
+     * @param {string} week
+     * @param {number} from
+     * @param {number} to
+     * @param {string|undefined} group
+     * @param {string} info
+     * @param {string} type
+     * @param {string[]} rooms
+     * @param {number} layer
+     * @param {boolean} selected
+     * @param {boolean} deleted
+     * @param {LessonColors|undefined} custom_color
+     */
+    constructor(id, name, link, day, week, from, to, group, info, type, rooms, layer, selected, deleted, custom_color) {
+        this.id = id;
+        this.name = name;
+        this.link = link;
+        this.day = day;
+        this.week = week;
+        this.from = from;
+        this.to = to;
+        this.group = group;
+        this.info = info;
+        this.type = type;
+        this.rooms = rooms;
+        this.layer = layer;
+        this.selected = selected;
+        this.deleted = deleted;
+        this.custom_color = custom_color;
+    }
+}
+
+/**
+ * Attempts to parse object to Lesson
+ * @param {any} object
+ */
+function parseLesson(object) {
+  if(object
+    &&("id" in object && typeof object.id === "string")
+    &&("name" in object && typeof object.name === "string")
+    &&("link" in object && typeof object.link === "string")
+    &&("day" in object && typeof object.day === "number")
+    &&("week" in object && typeof object.week === "string")
+    &&("from" in object && typeof object.from === "number")
+    &&("to" in object && typeof object.to === "number")
+    &&(("group" in object && typeof object.group === "string") || object.group === undefined)
+    &&("info" in object && typeof object.info === "string")
+    &&("type" in object && typeof object.type === "string")
+    &&("rooms" in object && Array.isArray(object.rooms))
+    &&("layer" in object && typeof object.layer === "number")
+    &&("selected" in object && typeof object.selected === "boolean")
+    &&("deleted" in object && typeof object.deleted === "boolean")
+    &&(("custom_color" in object && typeof object.custom_color === "string") || object.custom_color === undefined)
+  ){
+    for(const room of object.rooms){
+        if(typeof room !== "string"){
+            throw new Error("room is not string");
+        }
+    }
+    return new Lesson(object.id, object.name, object.link, object.day, object.week, object.from, object.to, object.group, object.info, object.type, object.rooms, object.layer, object.selected, object.deleted, object.custom_color);
+  }else{
+    throw new Error("Lesson missing params or params are wrong type");
+  }
+}
+
+class SubRange {
+    /**
+     * @param {number|undefined} blueCount
+     * @param {number|undefined} blueLength
+     * @param {number} blueRange
+     * @param {number|undefined} greenCount
+     * @param {number|undefined} greenLength
+     * @param {number} greenRange
+     * @param {string} link
+     * @param {string} name
+     * @param {string} raw
+     * @param {number} yellowRange
+     * @param {number|undefined} yellowCount
+     * @param {number|undefined} yellowLength
+     */
+    constructor(blueCount, blueLength, blueRange, greenCount, greenLength, greenRange, link, name, raw, yellowRange, yellowCount, yellowLength) {
+        this.blueCount = blueCount;
+        this.blueLength = blueLength;
+        this.blueRange = blueRange;
+        this.greenCount = greenCount;
+        this.greenLength = greenLength;
+        this.greenRange = greenRange;
+        this.link = link;
+        this.name = name;
+        this.raw = raw;
+        this.yellowRange = yellowRange;
+        this.yellowCount = yellowCount;
+        this.yellowLength = yellowLength;
+    }
+}
+
+/**
+ * Attempts to parse object to Range
+ * @param {any} object
+ */
+function parseSubRange(object) {
+    if (
+        object
+        &&(("blueCount" in object && typeof object.blueCount === "number") || (object.blueCount === undefined))
+        &&(("blueLength" in object && typeof object.blueLength === "number") || (object.blueLength === undefined))
+        &&("blueRange" in object && typeof object.blueRange === "number")
+        &&(("greenCount" in object && typeof object.greenCount === "number") || (object.greenCount === undefined))
+        &&(("greenLength" in object && typeof object.greenLength === "number") || (object.greenLength === undefined))
+        &&("greenRange" in object && typeof object.greenRange === "number")
+        &&("link" in object && typeof object.link === "string")
+        &&("name" in object && typeof object.name === "string")
+        &&("raw" in object && typeof object.raw === "string")
+        &&("yellowRange" in object && typeof object.yellowRange === "number")
+        &&(("yellowLength" in object && typeof object.yellowLength === "number") || (object.yellowLength === undefined))
+        &&(("yellowRange" in object && typeof object.yellowRange === "number") || (object.yellowRange === undefined))
+    ) {
+        return new SubRange(object.blueCount, object.blueLength, object.blueRange, object.greenCount, object.greenLength, object.greenRange, object.link, object.name, object.raw, object.yellowRange, object.yellowCount, object.yellowRange);
+    } else {
+        throw new Error("Range missing params or params are wrong type");
+    }
+}
+
+
 /////////////////////////////////// Variables //////////////////////////////////
-var studies = [];                                                                                          // Array of loaded studies
+/**@type {Study[]} */
+let studies = [];                                                                                          // Array of loaded studies
+/**
+ * @typedef {Object} CourseInfo
+ * @property {string} link
+ * @property {string} name
+ * @property {string} range
+ */
+
+/** @type {CourseInfo[]} */
 var subjects = [];                                                                                         // Array of selected subjects
+/** @type {CourseInfo[]} */
 var lastLoadedSubjects = [];                                                                               // Array of last loaded subjects
-var ranges = [];                                                                                           // Array of ranges of selected subjects
+/**@type {SubRange[]} */
+let ranges = [];                                                                                           // Array of ranges of selected subjects
+/**@type {Lesson[]} */
 var lessons = [];                                                                                          // Array of lessons of selected subjects
 var file = {
     "sem": "", "studies": [], "grades": [],
@@ -14,14 +288,71 @@ var fakeHtml = document.implementation.createHTMLDocument('virtual');           
 const dataUrl = "data";
 const subjectUrl = "subjectData";
 
+// elements
+
+const blank_keyup_event = new KeyboardEvent("keyup", {
+    bubbles: true,
+    cancelable: true,
+});
+
+/**@type {HTMLDivElement} */
+const header_info_icon = document.getElementById("header_info_icon");
+/**@type {HTMLDivElement} */
+const header_cross_icon = document.getElementById("header_cross_icon");
+/**@type {HTMLDivElement} */
+const secs_main = document.getElementById("secs_main");
+/**@type {HTMLDivElement} */
+const menu_icon = document.getElementById("menu_icon");
+/**@type {HTMLDivElement} */
+const secs = document.getElementById("secs");
+/**@type {HTMLDivElement} */
+const secs_info = document.getElementById("secs_info");
+/**@type {HTMLDivElement} */
+const menu = document.getElementById("menu");
+/**@type {HTMLSelectElement} */
+const year_select = document.getElementById("year_select");
+/**@type {HTMLInputElement} */
+const menu_com_search_input = document.getElementById("menu_com_search_input");
+/**@type {HTMLInputElement} */
+const menu_opt_search_input = document.getElementById("menu_opt_search_input");
+/**@type {HTMLInputElement|null} */
+const menu_bit_checkbox = document.getElementById("menu_bit_checkbox");
+/**@type {HTMLDivElement} */
+const menu_stud_column = document.getElementById("menu_stud_column");
+/**@type {HTMLDivElement} */
+const menu_com_column = document.getElementById("menu_com_column");
+/**@type {HTMLDivElement} */
+const menu_opt_column = document.getElementById("menu_opt_column");
+
+///////////////////////////////////// Node Templates ///////////////////////////
+
+const subjectNodeTemplate = document.createElement("div");
+{
+    subjectNodeTemplate.classList.add(`hidden`);
+    subjectNodeTemplate.classList.add('menu_column_row')
+
+    const input = document.createElement("input");
+    input.type = "checkbox";
+    input.className = "menu_column_row_checkbox menu_sub_checkbox";
+
+    const textDiv = document.createElement("div");
+    textDiv.className = "menu_column_row_text";
+
+    const cleaner = document.createElement("div");
+    cleaner.className = "cleaner";
+
+    subjectNodeTemplate.appendChild(input);
+    subjectNodeTemplate.appendChild(textDiv);
+    subjectNodeTemplate.appendChild(cleaner);
+}
 ///////////////////////////////////// Main /////////////////////////////////////
-$(document).ready(async function () {
+async function  main() {
     // Semester radio auto select
     var d = new Date();
     if (d.getMonth() === 11 || d.getMonth() < 4) {
-        $(".menu_sem_radio[value='summer']").prop("checked", true);
+        document.querySelector(".menu_sem_radio[value='summer']").checked = true;
     } else {
-        $(".menu_sem_radio[value='winter']").prop("checked", true);
+        document.querySelector(".menu_sem_radio[value='winter']").checked = true;
     }
 
     // Start menu load
@@ -29,40 +360,43 @@ $(document).ready(async function () {
 
     // Load local storage
     loadLocalStorage();
-}); // checked
+}
+
+main();
 
 //////////////////////////////////// Events ////////////////////////////////////
+
 // Icons
-$(document).on("click", ".header_info_icon", function () {
-    $(".header_info_icon").addClass("hidden");
-    $(".header_cross_icon").removeClass("hidden");
+header_info_icon.addEventListener("click", function () {
+    header_info_icon.classList.add("hidden");
+    header_cross_icon.classList.remove("hidden");
 
-    $(".secs_main").addClass("hidden");
-    $(".secs_info").removeClass("hidden");
+    secs_main.classList.add("hidden");
+    secs_info.classList.remove("hidden");
 }); // checked
-$(document).on("click", ".header_cross_icon", function () {
-    $(".header_info_icon").removeClass("hidden");
-    $(".header_cross_icon").addClass("hidden");
+header_cross_icon.addEventListener("click", function () {
+    header_info_icon.classList.remove("hidden");
+    header_cross_icon.classList.add("hidden");
 
-    $(".secs_main").removeClass("hidden");
-    $(".secs_info").addClass("hidden");
+    secs_main.classList.remove("hidden");
+    secs_info.classList.add("hidden");
 }); // checked
-$(document).on("click", ".menu_icon", function () {
-    $(".menu_icon").addClass("hidden");
+menu_icon.addEventListener("click", function () {
+    menu_icon.classList.add("hidden");
 
-    $(".secs").removeClass("secs_menu_hidden");
-    $(".menu").removeClass("hidden");
+    secs.classList.remove("secs_menu_hidden");
+    menu.classList.remove("hidden");
 }); // checked
-$(document).on("click", ".menu_cross_icon", function () {
-    $(".menu_icon").removeClass("hidden");
+document.getElementById("menu_cross_icon").addEventListener("click", function () {
+    menu_icon.classList.remove("hidden");
 
-    $(".secs").addClass("secs_menu_hidden");
-    $(".menu").addClass("hidden");
+    secs.classList.add("secs_menu_hidden");
+    menu.classList.add("hidden");
 }); // checked
 
 // Menu
-$(document).on("change", ".year_select", async function (e) {
-    year = Number($(this).val());
+year_select.addEventListener("change", async function (e) {
+    year = Number(e.target.value);
     studies = subjects = lastLoadedSubjects = ranges = lessons = [];
     file = {
         "sem": "", "studies": [], "grades": [],
@@ -71,14 +405,22 @@ $(document).on("change", ".year_select", async function (e) {
     await loadData();
     await loadLessons();
 }); // checked
-$(document).on("click", ".menu_sem_radio", function () {
-    $(".menu_com_search_input").prop("value", ""); $(".menu_com_search_input").trigger("keyup");
-    $(".menu_opt_search_input").prop("value", ""); $(".menu_opt_search_input").trigger("keyup");
-    renderSubjects();
-}); // checked
+
+function searchInputKeyup() {
+    menu_com_search_input.value = "";
+    menu_com_search_input.dispatchEvent(blank_keyup_event);
+    menu_opt_search_input.value = "";
+    menu_opt_search_input.dispatchEvent(blank_keyup_event);
+}
+
+for(const element of document.getElementsByClassName("menu_sem_radio")) {
+    element.addEventListener("click", function () {
+        searchInputKeyup();
+        renderSubjects();
+    });
+}    // checked
 $(document).on("click", ".menu_bit_checkbox", function () {
-    $(".menu_com_search_input").prop("value", ""); $(".menu_com_search_input").trigger("keyup");
-    $(".menu_opt_search_input").prop("value", ""); $(".menu_opt_search_input").trigger("keyup");
+    searchInputKeyup();
     renderSubjects();
 }); // checked
 $(document).on("click", ".menu_mit_radio", function () {
@@ -91,13 +433,11 @@ $(document).on("click", ".menu_mit_radio", function () {
         $(this).addClass("mit_radio_checked");
     }
 
-    $(".menu_com_search_input").prop("value", ""); $(".menu_com_search_input").trigger("keyup");
-    $(".menu_opt_search_input").prop("value", ""); $(".menu_opt_search_input").trigger("keyup");
+    searchInputKeyup();
     renderSubjects();
 }); // checked
 $(document).on("click", ".menu_grade_checkbox", function () {
-    $(".menu_com_search_input").prop("value", ""); $(".menu_com_search_input").trigger("keyup");
-    $(".menu_opt_search_input").prop("value", ""); $(".menu_opt_search_input").trigger("keyup");
+    searchInputKeyup();
     renderSubjects();
 }); // checked
 $(document).on("click", ".menu_sub_checkbox", function () {
@@ -106,13 +446,13 @@ $(document).on("click", ".menu_sub_checkbox", function () {
 $(document).on("click", ".menu_sel_checkbox", function () {
     renderSubjects();
 }); // checked
-$(document).on("keyup", ".menu_com_search_input", function () {
-    $(".menu_com_column .menu_column_row").removeClass("hidden_search");
-    if ($(".menu_com_search_input").prop("value") != "") {
-        $(".menu_com_column .menu_column_row").addClass("hidden_search");
-        $(".menu_com_column .menu_column_row").each(function (i, sub) {
+menu_com_search_input.addEventListener("keyup", function () {
+    $("#menu_com_column .menu_column_row").removeClass("hidden_search");
+    if (menu_com_search_input.value != "") {
+        $("#menu_com_column .menu_column_row").addClass("hidden_search");
+        $("#menu_com_column .menu_column_row").each(function (i, sub) {
             if ($(sub).children(".menu_column_row_text").length > 0) {
-                if ($(sub).children(".menu_column_row_text").html().toUpperCase().includes($(".menu_com_search_input").prop("value").toUpperCase())) {
+                if ($(sub).children(".menu_column_row_text").html().toUpperCase().includes(menu_com_search_input.innerText.toUpperCase())) {
                     $(sub).removeClass("hidden_search");
                 }
             }
@@ -120,10 +460,10 @@ $(document).on("keyup", ".menu_com_search_input", function () {
     }
 }); // checked
 $(document).on("keyup", ".menu_opt_search_input", function () {
-    $(".menu_opt_column .menu_column_row").removeClass("hidden_search");
+    $("#menu_opt_column .menu_column_row").removeClass("hidden_search");
     if ($(".menu_opt_search_input").prop("value") != "") {
-        $(".menu_opt_column .menu_column_row").addClass("hidden_search");
-        $(".menu_opt_column .menu_column_row").each(function (i, sub) {
+        $("#menu_opt_column .menu_column_row").addClass("hidden_search");
+        $("#menu_opt_column .menu_column_row").each(function (i, sub) {
             if ($(sub).children(".menu_column_row_text").length > 0) {
                 if ($(sub).children(".menu_column_row_text").html().toUpperCase().includes($(".menu_opt_search_input").prop("value").toUpperCase())) {
                     $(sub).removeClass("hidden_search");
@@ -197,7 +537,7 @@ $(document).on("click", ".schedule_cell_bin", function () {
 }); // checked
 $(document).on("click", ".lesson_add_card_button", function () {
     // New lesson
-    var lesson = {
+    let lesson = parseLesson({
         "id": "CUST_" + makeHash("custom" + Date.now()),
         "name": $(".lesson_add_card_name").val(),
         "link": "0-" + $(".lesson_add_card_name").val(),
@@ -212,7 +552,7 @@ $(document).on("click", ".lesson_add_card_button", function () {
         "layer": 1,
         "selected": false,
         "deleted": false
-    };
+    });
 
     // Check
     if (lesson.from >= lesson.to) {
@@ -232,69 +572,78 @@ $(document).on("click", ".lesson_add_card_button", function () {
 }); // checked
 
 ///////////////////////////////////// Menu /////////////////////////////////////
-async function loadData() {
+function showMessage(text) {
     $(".loading_message").removeClass("hidden");
     $(".loading_message").html("Načítám data...");
+}
+function hideMessage() {
+    $(".loading_message").html("");
+    $(".loading_message").addClass("hidden");
+}
+
+async function loadData() {
 
     // Initialize studies
     studies = [];
 
     try {
-        // AJAX call to the new /data endpoint
-        var data = await $.ajax({
-            url: dataUrl,
-            method: 'GET',
-            data: {
-                'year': year
-            },
-            dataType: 'json',
-            async: true
-        });
+        const url = new URL(dataUrl, window.location.origin);
+        url.searchParams.append("year", year);
+        const req = await fetch(url);
+        const data = await req.json();
+        if("studies" in data){
+            for(const study of data.studies){
+                try{
+                    studies.push(parseStudy(study));
+                }catch (e){
+                    console.warn(`Skipping study parse: ${e}\nstudy object: ${JSON.stringify(study)}`)
+                }
+            }
+        }else{
+            showMessage("Nebyla nalezena žádná studia.")
+        }
 
         // Assign studies and years from the response
-        studies = data.studies;
-        let years = data.years;
+        /**@type {Year[]} */
+        const years = [];
+        if("years" in data){
+            for(const year of data.years){
+                years.push(parseYear(year));
+            }
+        }
 
         // Generate studies menu
-        $(".menu_stud_column").html("");
-        $.each(studies, function (i, stud) {
-            if (stud.name === "BIT") {
-                $(".menu_stud_column").append(` <div class="menu_column_row">
+        menu_stud_column.innerHTML = "";
+        for(const stud of studies){
+            if (stud.name === "BIT") { // this is potentially unsafe
+                menu_stud_column.innerHTML += ` <div class="menu_column_row">
                                                     <input class="menu_column_row_checkbox menu_bit_checkbox" type="checkbox" value="BIT">
                                                     <div class="menu_column_row_text">BIT</div>
                                                     <div class="cleaner"></div>
-                                                </div>`);
+                                                </div>`;
             } else {
-                $(".menu_stud_column").append(` <div class="menu_column_row">
-                                                    <input class="menu_column_row_radio menu_mit_radio" type="radio" name="mit_grade" value="` + stud.name + `">
-                                                    <div class="menu_column_row_text">` + stud.name + `</div>
+                menu_stud_column.innerHTML +=` <div class="menu_column_row">
+                                                    <input class="menu_column_row_radio menu_mit_radio" type="radio" name="mit_grade" value="${stud.name}">
+                                                    <div class="menu_column_row_text">${stud.name}</div>
                                                     <div class="cleaner"></div>
-                                                </div>`);
+                                                </div>`;
             }
-        });
+        }
 
         // Generate years select
-        $(".menu_column_row_select").html("");
+        year_select.innerHTML = "";
         if (years.length === 0)
-            $(".menu_column_row_select").append(` <option value="` + year + `" selected>` + year + `/` + (year + 1) + `</option>`);
-        else
-            $.each(years, function (i, y) {
-                $(".menu_column_row_select").append(` <option value="` + y.value + `" ` + (year === y.value ? "selected" : "") + `>` + y.name + `</option>`);
-            });
-
-        // Generate years select in another place
-        $(".year_select").html("");
-        if (years.length === 0)
-            $(".year_select").append(` <option value="` + year + `" selected>` + year + `/` + (year + 1) + `</option>`);
-        else
-            $.each(years, function (i, y) {
-                $(".year_select").append(` <option value="` + y.value + `" ` + (year === y.value ? "selected" : "") + `>` + y.name + `</option>`);
-            });
+            year_select.innerHTML += ` <option value="` + year + `" selected>` + year + `/` + (year + 1) + `</option>`;
+        else{
+            for(const y of years) {
+                year_select.innerHTML += ` <option value="` + y.value + `" ` + (year === y.value ? "selected" : "") + `>` + y.name + `</option>`;
+            }
+        }
 
         // Generate subjects
-        $(".menu_com_column").html("");
-        $(".menu_opt_column").html("");
-        $.each(studies, function (i, stud) {
+        menu_com_column.innerHTML = "";
+        menu_opt_column.innerHTML = "";
+        for(const stud of studies) {
             for (var grade = 0; grade < 3; grade++) {
                 // Name
                 var name = stud.name;
@@ -305,48 +654,54 @@ async function loadData() {
                 }
 
                 // Com
-                $(".menu_com_column").append(`  <div class="menu_column_row mrsub_` + grade + `_` + stud.name + ` hidden">
+                // potentially unsafe
+                menu_com_column.innerHTML += `  <div class="menu_column_row mrsub_` + grade + `_` + stud.name + ` hidden">
                                                     <div class="menu_column_row_text_split">
                                                         <div class="menu_column_row_text_split_inner">` + name + `</div>
                                                     </div>
-                                                </div>`);
-                $.each(stud.subjects.com[grade], function (o, sub) {
-                    $(".menu_com_column").append(`  <div class="menu_column_row mrsub_` + grade + `_` + stud.name + ` mrsem_` + sub.sem + ` hidden">
-                                                        <input class="menu_column_row_checkbox menu_sub_checkbox" type="checkbox" value="` + sub.link + `">
-                                                        <div class="menu_column_row_text">` + sub.name + `</div>
-                                                        <div class="cleaner"></div>
-                                                    </div>`);
-                });
+                                                </div>`;
+                for(const sub of stud.subjects.com[grade]){
+                    /**@type {HTMLDivElement} */
+                    // This is to improve speed
+                    const subjectNode = subjectNodeTemplate.cloneNode(true);
+                    subjectNode.classList.add(`mrsub_${grade}_${stud.name}`);
+                    subjectNode.classList.add(`mrsem_${sub.sem}`);
+                    subjectNode.getElementsByClassName("menu_column_row_checkbox")[0].value = sub.link;
+                    subjectNode.getElementsByClassName("menu_column_row_text")[0].innerText = sub.name;
+                    menu_com_column.appendChild(subjectNode);
+                };
 
                 // Opt
-                $(".menu_opt_column").append(`  <div class="menu_column_row mrsub_` + grade + `_` + stud.name + ` hidden">
+                // potentially unsafe
+                menu_opt_column.innerHTML += `  <div class="menu_column_row mrsub_` + grade + `_` + stud.name + ` hidden">
                                                     <div class="menu_column_row_text_split">
                                                         <div class="menu_column_row_text_split_inner">` + name + `</div>
                                                     </div>
-                                                </div>`);
-                $.each(stud.subjects.opt[grade], function (o, sub) {
-                    $(".menu_opt_column").append(`  <div class="menu_column_row mrsub_` + grade + `_` + stud.name + ` mrsem_` + sub.sem + ` hidden">
-                                                        <input class="menu_column_row_checkbox menu_sub_checkbox" type="checkbox" value="` + sub.link + `">
-                                                        <div class="menu_column_row_text">` + sub.name + `</div>
-                                                        <div class="cleaner"></div>
-                                                    </div>`);
-                });
+                                                </div>`;
+                for(const sub of stud.subjects.opt[grade]){
+                    const subjectNode = subjectNodeTemplate.cloneNode(true);
+                    subjectNode.classList.add(`mrsub_${grade}_${stud.name}`);
+                    subjectNode.classList.add(`mrsem_${sub.sem}`);
+                    subjectNode.getElementsByClassName("menu_column_row_checkbox")[0].value = sub.link;
+                    subjectNode.getElementsByClassName("menu_column_row_text")[0].innerText = sub.name;
+                    menu_opt_column.appendChild(subjectNode);
+                };
             }
-        });
+        }
 
         // Done
-        $(".header_info_icon").removeClass("hidden");
-        $(".header_cross_icon").addClass("hidden");
-        $(".menu").removeClass("hidden");
-        $(".secs").removeClass("hidden");
-        $(".loading_message").html("");
-        $(".loading_message").addClass("hidden");
+        header_info_icon.classList.add("hidden");
+        header_cross_icon.classList.remove("hidden");
+        menu.classList.remove("hidden");
+        secs.classList.remove("hidden");
+        hideMessage();
 
         // Render
         renderSubjects();
 
     } catch (e) {
-        $(".loading_message").html("Chyba při načítání dat...");
+        console.error(e);
+        showMessage("Chyba při načítání dat...");
     }
 }
 
@@ -390,16 +745,16 @@ function renderSubjects() {
 
     // Searches render
     if (bitSelected || mitSelected) {
-        $(".menu_com_search_input").removeClass("hidden");
-        $(".menu_opt_search_input").removeClass("hidden");
+        menu_com_search_input.classList.remove("hidden");
+        menu_opt_search_input.classList.remove("hidden");
     } else {
-        $(".menu_com_search_input").addClass("hidden");
-        $(".menu_opt_search_input").addClass("hidden");
+        menu_com_search_input.classList.add("hidden");
+        menu_opt_search_input.classList.add("hidden");
     }
 
     // Subjects render
-    $(".menu_com_column .menu_column_row").addClass("hidden");
-    $(".menu_opt_column .menu_column_row").addClass("hidden");
+    $("#menu_com_column .menu_column_row").addClass("hidden");
+    $("#menu_opt_column .menu_column_row").addClass("hidden");
     $.each(groups, function (i, group) {
         $(".mrsub_" + group).removeClass("hidden");
     })
@@ -429,19 +784,23 @@ function renderSubjects() {
 async function loadLessons() {
     // Info
     {
-        $(".header_info_icon").addClass("hidden");
-        $(".header_cross_icon").addClass("hidden");
-        $(".secs_main").removeClass("hidden");
-        $(".secs_info").addClass("hidden");
+        header_info_icon.classList.add("hidden");
+        header_cross_icon.classList.add("hidden");
+        secs_main.classList.remove("hidden");
+        secs_info.classList.add("hidden");
 
-        $(".menu_column_row_checkbox").prop("disabled", true);
-        $(".menu_column_row_radio").prop("disabled", true);
-        $(".menu_button").prop("disabled", true);
-        $(".menu_button").addClass("menu_button_disabled");
-
-        $(".loading_message").html("Načítání...");
-        $(".loading_message").removeClass("hidden");
-        $(".secs").addClass("hidden");
+        for(const elem of document.getElementsByClassName("menu_column_row_checkbox")){
+            elem.setAttribute("disabled", true);
+        }
+        for(const elem of document.getElementsByClassName("menu_column_row_radio")){
+            elem.setAttribute("disabled", true);
+        }
+        for(const elem of document.getElementsByClassName("menu_button")){
+            elem.setAttribute("disabled", true);
+            elem.classList.add("menu_button_disabled");
+        }
+        showMessage("Načítání...");
+        secs.classList.add("hidden");
     }
 
     // Make file
@@ -450,77 +809,83 @@ async function loadLessons() {
         file.year = year;
 
         // Sem
-        file.sem = $(".menu_sem_radio:checked").prop("value");
+        file.sem = document.querySelector(".menu_sem_radio:checked")?.value;
 
         // Study
         file.studies = [];
-        if ($(".menu_bit_checkbox:checked").length > 0) {
-            file.studies.push($(".menu_bit_checkbox:checked").prop("value"));
+        if (document.querySelectorAll(".menu_bit_checkbox:checked").length > 0) {
+            file.studies.push(document.querySelector(".menu_bit_checkbox:checked").getAttribute("value"));
         }
-        if ($(".menu_mit_radio:checked").length > 0) {
-            file.studies.push($(".menu_mit_radio:checked").prop("value"));
+        if (document.querySelectorAll(".menu_mit_radio:checked").length > 0) {
+            file.studies.push(document.querySelector(".menu_mit_radio:checked").getAttribute("value"));
         }
 
         // Grades
         file.grades = [];
-        $.each($(".menu_grade_checkbox:checked"), function (i, grade) {
-            file.grades.push($(grade).prop("value"));
-        });
+        for(const grade of document.querySelectorAll(".menu_grade_checkbox:checked")) {
+            file.grades.push(grade.getAttribute("value"));
+        };
 
         // Subjects
         file.subjects = [];
-        $.each($(".menu_sel_checkbox"), function (i, sub) {
-            file.subjects.push($(sub).siblings(".menu_column_row_text").html());
-        });
+        for(const sub of document.getElementsByClassName("menu_sel_checkbox")){
+            file.subjects.push(sub.parentElement.getElementsByClassName("menu_column_row_text")[0].innerText);
+        }
     }
 
     // Subjects fill
     subjects = [];
-    $(".menu_sel_checkbox").each(function (i, sub) {
+    for(const sub of document.getElementsByClassName("menu_sel_checkbox")) {
         subjects.push({
-            "name": $(sub).siblings(".menu_column_row_text").html(),
-            "link": $(sub).prop("value"),
+            "name": sub.parentElement.getElementsByClassName("menu_column_row_text")[0].innerText,
+            "link": sub.getAttribute("value"),
             "range": ""
         });
-    });
+    }
 
     // Prepare data to send to the backend
     let subjectLinks = subjects.map(sub => sub.link);
 
     // Load existing lessons of selected subjects
     var tempLessons = [];
-    $.each(subjects, function (i, sub) {
+    for(const sub of subjects){
         tempLessons = tempLessons.concat(lessons.filter(x => x.name === sub.name && x.type != "custom"));
-    });
+    }
     tempLessons = tempLessons.concat(lessons.filter(x => x.type === "custom"));
     lessons = tempLessons;
 
     // Send GET request to /subjectData endpoint
     try {
         // Title
-        $(".loading_message").removeClass("hidden");
-        $(".loading_message").html("Načítám data předmětů...");
+        showMessage("Načítám data předmětů...")
 
         // Build query parameters
-        let params = {
+        const params = new URLSearchParams({
             subjects: JSON.stringify(subjectLinks),
             year: year
-        };
-
-        // Encode parameters
-        let queryString = $.param(params);
-
-        let response = await $.ajax({
-            url: subjectUrl + '?' + queryString,
-            method: 'GET',
-            dataType: 'json',
-            async: true
         });
 
-        ranges = response.ranges;
+        // Encode parameters as query string
+        const queryString = params.toString();
+
+        // Make the request
+        const response = await fetch(`${subjectUrl}?${queryString}`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+
+        // Parse JSON response
+        const data = await response.json();
+
+        for(const rangeObject of data.ranges){
+            ranges.push(parseSubRange(rangeObject))
+        }
 
         // Update lessons and ranges
-        $.each(response.lessons, function (i, lesson) {
+        for(const lessonObject of data.lessons) {
+            const lesson = parseLesson(lessonObject);
             // Check if the lesson already exists
             if (!lessons.find(l => l.id === lesson.id)) {
                 lessons.push(lesson);
@@ -555,27 +920,32 @@ async function loadLessons() {
                 }
 
             }
-        });
+        }
 
         lastLoadedSubjects = subjects;
 
         // Done
-        $(".header_info_icon").removeClass("hidden");
+        header_info_icon.classList.remove("hidden");
 
-        $(".menu_column_row_checkbox").prop("disabled", false);
-        $(".menu_column_row_radio").prop("disabled", false);
-        $(".menu_button").prop("disabled", false);
-        $(".menu_button").removeClass("menu_button_disabled");
+        for(const elem of document.getElementsByClassName("menu_column_row_checkbox")){
+            elem.removeAttribute("disabled");
+        }
+        for(const elem of document.getElementsByClassName("menu_column_row_radio")){
+            elem.removeAttribute("disabled");
+        }
+        for(const elem of document.getElementsByClassName("menu_button")){
+            elem.removeAttribute("disabled");
+            elem.classList.remove("menu_button_disabled");
+        }
 
-        $(".loading_message").html("");
-        $(".loading_message").addClass("hidden");
-        $(".secs").removeClass("hidden");
+        hideMessage();
+        secs.classList.remove("hidden");
 
         // Render
         renderAll();
 
     } catch (error) {
-        $(".loading_message").html("Chyba při načítání dat předmětů...");
+        showMessage("Chyba při načítání dat předmětů...");
         console.error('Error loading subject data:', error);
     }
 }
@@ -975,11 +1345,9 @@ function makeFile() {
 } // checked
 async function restoreFile() {
     // Year
-    if (file.year && year != file.year) {
+    if (file.year) {
         year = file.year;
-        $(".year_select").val(year);
-        studies = subjects = lastLoadedSubjects = ranges = lessons = [];
-        await loadData();
+        year_select.value = year;
     }
 
     // Sem
@@ -1001,14 +1369,14 @@ async function restoreFile() {
 
     // Subjects
     $(".menu_sub_checkbox").prop("checked", false);
-    $(".menu_com_column .menu_column_row").each(function (i, sub) {
+    $("#menu_com_column .menu_column_row").each(function (i, sub) {
         if ($(sub).children(".menu_column_row_text").length > 0) {
             if (file.subjects.includes($(sub).children(".menu_column_row_text").html())) {
                 $(sub).children(".menu_sub_checkbox").prop("checked", true);
             }
         }
     });
-    $(".menu_opt_column .menu_column_row").each(function (i, sub) {
+    $("#menu_opt_column .menu_column_row").each(function (i, sub) {
         if ($(sub).children(".menu_column_row_text").length > 0) {
             if (file.subjects.includes($(sub).children(".menu_column_row_text").html())) {
                 $(sub).children(".menu_sub_checkbox").prop("checked", true);
@@ -1017,8 +1385,7 @@ async function restoreFile() {
     });
 
     // Menu
-    $(".menu_com_search_input").prop("value", ""); $(".menu_com_search_input").trigger("keyup");
-    $(".menu_opt_search_input").prop("value", ""); $(".menu_opt_search_input").trigger("keyup");
+    searchInputKeyup();
     renderSubjects();
     lastLoadedSubjects = [];
     lessons = [];
@@ -1056,21 +1423,23 @@ function downloadJSON() {
     document.body.removeChild(element);
 } // checked
 function loadJSON() {
-    // No file
-    if (!$(".json_load_input")[0].files[0]) {
-        $(".secs").addClass("hidden");
-        $(".loading_message").removeClass("hidden");
-        $(".loading_message").html("Nevybrán žádný soubor");
+    function blinkMessage(text) {
+        secs.classList.add("hidden");
+        showMessage("Nevybrán žádný soubor.");
         $(".menu_button").prop("disabled", true);
         $(".menu_button").addClass("menu_button_disabled");
 
         setTimeout(function () {
-            $(".loading_message").html("");
-            $(".loading_message").addClass("hidden");
-            $(".secs").removeClass("hidden");
+            hideMessage();
+            secs.classList.remove("hidden");
             $(".menu_button").prop("disabled", false);
             $(".menu_button").removeClass("menu_button_disabled");
         }, 2000);
+    }
+
+    // No file
+    if (!$(".json_load_input")[0].files[0]) {
+        blinkMessage("Nevybrán žádný soubor.");
     }
 
     var reader = new FileReader();
@@ -1082,36 +1451,12 @@ function loadJSON() {
             storeLocalStorage();
         } catch (e) {
             // Parse error
-            $(".secs").addClass("hidden");
-            $(".loading_message").removeClass("hidden");
-            $(".loading_message").html("Chyba při parsování souboru");
-            $(".menu_button").prop("disabled", true);
-            $(".menu_button").addClass("menu_button_disabled");
-
-            setTimeout(function () {
-                $(".loading_message").html("");
-                $(".loading_message").addClass("hidden");
-                $(".secs").removeClass("hidden");
-                $(".menu_button").prop("disabled", false);
-                $(".menu_button").removeClass("menu_button_disabled");
-            }, 2000);
+            blinkMessage("Chyba při parsování souboru");
         }
     }
     reader.onerror = function (e) {
         // Read error
-        $(".secs").addClass("hidden");
-        $(".loading_message").removeClass("hidden");
-        $(".loading_message").html("Chyba při čtení souboru");
-        $(".menu_button").prop("disabled", true);
-        $(".menu_button").addClass("menu_button_disabled");
-
-        setTimeout(function () {
-            $(".loading_message").html("");
-            $(".loading_message").addClass("hidden");
-            $(".secs").removeClass("hidden");
-            $(".menu_button").prop("disabled", false);
-            $(".menu_button").removeClass("menu_button_disabled");
-        }, 2000);
+        blinkMessage("Chyba při čtení souboru");
     }
 } // checked
 

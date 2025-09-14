@@ -25,22 +25,22 @@
                 <div class="header_logo"></div>
                 <div class="header_name">scheduler</div>
                 <div class="header_version"></div>
-                <div class="header_icon header_cross_icon hidden"></div>
-                <div class="header_icon header_info_icon hidden"></div>
+                <div id="header_cross_icon" class="header_icon hidden"></div>
+                <div id="header_info_icon" class="header_icon hidden"></div>
                 <div class="cleaner"></div>
             </div>
 
             <div class="content">
-                <div class="menu_icon hidden"></div>
+                <div id="menu_icon" class="hidden"></div>
 
-                <div class="menu hidden">
+                <div id="menu" class="hidden">
                     <div class="menu_conta">
                         <div class="menu_columns">
                             <div class="menu_column">
                                 <div class="menu_column_title">Rok a semestr</div>
                                 <div class="menu_column_conta">
                                     <div class="menu_column_row" style="height: 40px">
-                                        <select class="menu_column_row_select year_select" name="ac_year"></select>
+                                        <select id="year_select" class="menu_column_row_select" name="ac_year"></select>
                                         <div class="cleaner"></div>
                                     </div>
                                     <div class="menu_column_row">
@@ -58,7 +58,7 @@
 
                             <div class="menu_column">
                                 <div class="menu_column_title">Studium</div>
-                                <div class="menu_column_conta menu_stud_column"></div>
+                                <div id="menu_stud_column" class="menu_column_conta"></div>
                             </div>
 
                             <div class="menu_column">
@@ -94,14 +94,14 @@
 
                             <div class="menu_column">
                                 <div class="menu_column_title">Povinné předměty</div>
-                                <input class="menu_column_input_text menu_com_search_input hidden" type="text" placeholder="Vyhledat">
-                                <div class="menu_column_conta menu_com_column"></div>
+                                <input id="menu_com_search_input" class="menu_column_input_text hidden" type="text" placeholder="Vyhledat">
+                                <div id="menu_com_column" class="menu_column_conta"></div>
                             </div>
 
                             <div class="menu_column">
                                 <div class="menu_column_title">Volitelné předměty</div>
-                                <input class="menu_column_input_text menu_opt_search_input hidden" type="text" placeholder="Vyhledat">
-                                <div class="menu_column_conta menu_opt_column"></div>
+                                <input id="menu_opt_search_input" class="menu_column_input_text hidden" type="text" placeholder="Vyhledat">
+                                <div id="menu_opt_column" class="menu_column_conta"></div>
                             </div>
 
                             <div class="menu_column">
@@ -137,7 +137,7 @@
                     </div>
 
                     <div class="menu_icons">
-                        <div class="menu_cross_icon"></div>
+                        <div id="menu_cross_icon"></div>
                     </div>
 
                     <div class="cleaner"></div>
@@ -145,8 +145,8 @@
 
                 <div class="loading_message">Načítání...</div>
 
-                <div class="secs hidden">
-                    <div class="secs_main">
+                <div id="secs" class="hidden">
+                    <div id="secs_main">
                         <div class="secs_header">
                             <div class="secs_header_elem secs_header_elem_selected ch_0">Pracovní rozvrh</div>
                             <div class="secs_header_elem ch_1">Výsledný rozvrh</div>
@@ -408,7 +408,7 @@
                         </div>
                     </div>
 
-                    <div class="secs_info hidden">
+                    <div id="secs_info" class="hidden">
                         <div class="info_half">
                             <div class="title">Info k aplikaci</div>
                             <div class="bubble">Vlevo je menu, kde se vybírají předměty. Data se načítají ze stránek FITu, jednotlivé bloky nemusí vždy sedět s&nbsp;IS VUT a&nbsp;realitou!</div>
