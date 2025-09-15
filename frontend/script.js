@@ -338,7 +338,11 @@ const ch_1 = document.getElementById("ch_1");
 /**@type {HTMLDivElement} */
 const ch_2 = document.getElementById("ch_2");
 /**@type {HTMLDivElement} */
-const scheduleAll = document.getElementById("schedule_all");
+const schedule_all = document.getElementById("schedule_all");
+/**@type {HTMLDivElement} */
+const schedule_fin = document.getElementById("schedule_fin");
+
+
 ///////////////////////////////////// Node Templates ///////////////////////////
 
 const subjectMenuNodeTemplate = document.createElement("div");
@@ -1246,8 +1250,14 @@ function renderAll() {
     renderScheduleFin();
     renderRanges();
 } // checked
-function renderSchedule() {
-    // Push lessons
+
+/**
+ * Render any schedule
+ * @param {HTMLDivElement} parentSchedule 
+ * @param {Lesson[]} lessons 
+ */
+function renderAnySchedule(parentSchedule, lessons){
+// Push lessons
     /** @type {[Lesson[], Lesson[], Lesson[], Lesson[], Lesson[]]} */
     const schedule = [[], [], [], [], []];
     for(const les of lessons) {
@@ -1285,7 +1295,7 @@ function renderSchedule() {
     }
 
     // Prepare schedule rows
-    const rows = scheduleAll.getElementsByClassName("schedule_row");
+    const rows = parentSchedule.getElementsByClassName("schedule_row");
     
     for (d = 0; d < 5; d++) {
         // Prepare schedule row
@@ -1335,94 +1345,17 @@ function renderSchedule() {
             layerDiv.appendChild(createScheduleCell(rooms, classes, left, length, les));
         }
     }
-} // checked
+}
+
+function renderSchedule() {
+    renderAnySchedule(schedule_all, lessons)
+}
 function renderScheduleFin() {
-    // Push lessons
-    var schedule = [[], [], [], [], []];
-    $.each(lessons, function (i, les) {
-        if (les.selected == true) {
-            // Reinit
-            les.layer = 1;
-
-            // Collisions
-            do {
-                var collison = false;
-                $.each(schedule[les.day], function (o, lesX) {
-                    if (les.layer === lesX.layer) {
-                        if (doLessonsCollide(les.from, les.to, lesX.from, lesX.to)) {
-                            collison = true;
-                            les.layer++;
-                        }
-                    }
-                });
-            } while (collison === true);
-
-            // Push
-            schedule[les.day].push(les);
-        }
+    const lessonsToRender = lessons.filter(function(lesson){
+        return lesson.selected && !(lesson.deleted);
     });
-
-    // Layers count
-    var scheduleLayersCount = [1, 1, 1, 1, 1];
-    for (d = 0; d < 5; d++) {
-        var maxLayer = 1;
-        $.each(schedule[d], function (i, les) {
-            if (les.layer > maxLayer) {
-                maxLayer = les.layer;
-            }
-        });
-        scheduleLayersCount[d] = maxLayer;
-    }
-
-    // Prepare schedule rows
-    for (d = 0; d < 5; d++) {
-        $(".schedule_fin").find(".schedule_row").eq(d).children(".schedule_row_layers").html("");
-        for (l = 0; l < scheduleLayersCount[d]; l++) {
-            $(".schedule_fin").find(".schedule_row").eq(d).children(".schedule_row_layers").append(`<div class="schedule_row_layer"></div>`);
-        }
-
-        $(".schedule_fin").find(".schedule_row").eq(d).children(".schedule_row_header").css("line-height", (scheduleLayersCount[d] * 90 + 6) + "px");
-    }
-
-    // Generation of cells
-    for (d = 0; d < 5; d++) {
-        var fullLength = +$(".schedule_fin").find(".schedule_row").eq(d).children(".schedule_row_layers").width();
-
-        $.each(schedule[d], function (i, les) {
-            var length = ((les.to - les.from) * (fullLength / 14)) - 6 - 6;
-            var left = (les.from * (fullLength / 14)) + 3;
-
-            var classes = "";
-            if (les.type === "green") {
-                classes += "schedule_cell_type_green ";
-            } else if (les.type === "blue") {
-                classes += "schedule_cell_type_blue ";
-            } else if (les.type === "yellow") {
-                classes += "schedule_cell_type_yellow ";
-            } else if (les.type === "custom") {
-                classes += "schedule_cell_type_" + les.custom_color + " ";
-            }
-            if (isOddWeek(les.week)) {
-                classes += "schedule_cell_week_odd ";
-            } else if (isEvenWeek(les.week)) {
-                classes += "schedule_cell_week_even ";
-            }
-
-            var rooms = "";
-            $.each(les.rooms, function (i, room) {
-                rooms += room + " ";
-            });
-
-            var layerDiv = $(".schedule_fin").find(".schedule_row").eq(d).children(".schedule_row_layers").children(".schedule_row_layer").eq(les.layer - 1);
-            $(layerDiv).append(`<div class="schedule_cell schedule_cell_selected ` + classes + `" style="left: ` + left + `px; width: ` + length + `px">
-                                    <div class="schedule_cell_name"><a target="_blank" href="https://www.fit.vut.cz/study/course/` + les.link.split("-")[1] + `">` + les.name + `</a></div>
-                                    <div class="schedule_cell_rooms">` + rooms + `</div>
-                                    <div class="schedule_cell_desc">` + les.week + `</div>
-                                    <div class="schedule_cell_info" title="` + (typeof les.info !== "undefined" ? les.info : "") + `">` + (typeof les.info !== "undefined" ? les.info : "") + `</div>
-                                </div>`)
-        });
-    }
-} // checked
+    renderAnySchedule(schedule_fin, lessonsToRender);   
+}
 function renderRanges() {
     $(".ranges").html("");
     $.each(ranges, function (i, rang) {
