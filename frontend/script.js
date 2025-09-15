@@ -323,17 +323,35 @@ const menu_stud_column = document.getElementById("menu_stud_column");
 const menu_com_column = document.getElementById("menu_com_column");
 /**@type {HTMLDivElement} */
 const menu_opt_column = document.getElementById("menu_opt_column");
-
+/**@type {HTMLDivElement} */
+const menu_sel_column = document.getElementById("menu_sel_column");
+/**@type {HTMLDivElement} */
+const se_0 = document.getElementById("se_0");
+/**@type {HTMLDivElement} */
+const se_1 = document.getElementById("se_1");
+/**@type {HTMLDivElement} */
+const se_2 = document.getElementById("se_2");
+/**@type {HTMLDivElement} */
+const ch_0 = document.getElementById("ch_0");
+/**@type {HTMLDivElement} */
+const ch_1 = document.getElementById("ch_1");
+/**@type {HTMLDivElement} */
+const ch_2 = document.getElementById("ch_2");
+/**@type {HTMLDivElement} */
+const scheduleAll = document.getElementById("schedule_all");
 ///////////////////////////////////// Node Templates ///////////////////////////
 
-const subjectNodeTemplate = document.createElement("div");
+const subjectMenuNodeTemplate = document.createElement("div");
 {
-    subjectNodeTemplate.classList.add(`hidden`);
-    subjectNodeTemplate.classList.add('menu_column_row')
+    subjectMenuNodeTemplate.classList.add(`hidden`);
+    subjectMenuNodeTemplate.classList.add('menu_column_row')
 
     const input = document.createElement("input");
     input.type = "checkbox";
     input.className = "menu_column_row_checkbox menu_sub_checkbox";
+    input.addEventListener("click", function () {
+        renderRanges();
+    });
 
     const textDiv = document.createElement("div");
     textDiv.className = "menu_column_row_text";
@@ -341,10 +359,147 @@ const subjectNodeTemplate = document.createElement("div");
     const cleaner = document.createElement("div");
     cleaner.className = "cleaner";
 
-    subjectNodeTemplate.appendChild(input);
-    subjectNodeTemplate.appendChild(textDiv);
-    subjectNodeTemplate.appendChild(cleaner);
+    subjectMenuNodeTemplate.appendChild(input);
+    subjectMenuNodeTemplate.appendChild(textDiv);
+    subjectMenuNodeTemplate.appendChild(cleaner);
 }
+
+/**
+ * creates new Element representing subject in menu
+ * @param {number} grade
+ * @param {Study} study 
+ * @param {Subject} sub 
+ * @returns 
+ */
+function createSubjectMenuNode(grade, study, sub){
+    const subjectMenuNode = subjectMenuNodeTemplate.cloneNode(true);
+    subjectMenuNode.classList.add(`mrsub_${grade}_${study.name}`);
+    subjectMenuNode.classList.add(`mrsem_${sub.sem}`);
+    subjectMenuNode.getElementsByClassName("menu_column_row_checkbox")[0].value = sub.link;
+    subjectMenuNode.getElementsByClassName("menu_column_row_text")[0].innerText = sub.name;
+    menu_com_column.appendChild(subjectMenuNode);
+    subjectMenuNode.getElementsByClassName("menu_sub_checkbox")[0].addEventListener("click", function(){
+        renderSubjects();
+        renderRanges();
+    });
+    return subjectMenuNode;
+}
+
+
+const subjectGradeSeparatorTemplate = document.createElement("div");
+{
+    subjectGradeSeparatorTemplate.classList.add("menu_column_row");
+    subjectGradeSeparatorTemplate.classList.add("hidden");
+    const innerWrapper = document.createElement("div");
+    innerWrapper.classList.add("menu_column_row_text_split");
+
+    const innerDiv = document.createElement("div");
+    innerDiv.classList.add("menu_column_row_text_split_inner");
+
+    // Nest the divs
+    innerWrapper.appendChild(innerDiv);
+    subjectGradeSeparatorTemplate.appendChild(innerWrapper);
+}
+
+/**
+ * creates new Element representing subject separator in menu
+ * @param {number} grade
+ * @param {Study} study
+ * @param {string} name
+ */
+function createSubjectGradeSeparator(grade, study, name){
+    const subjectGradeSeparator = subjectGradeSeparatorTemplate.cloneNode(true);
+    subjectGradeSeparator.classList.add(`mrsub_${grade}_${study.name}`);
+
+    subjectGradeSeparator.getElementsByClassName("menu_column_row_text_split_inner")[0].innerText = name;
+
+    return subjectGradeSeparator;
+}
+
+const scheduleCellTemplate = document.createElement("div");
+{
+    scheduleCellTemplate.classList.add("schedule_cell");
+
+    // Name
+    const name = document.createElement("div");
+    name.classList.add("schedule_cell_name");
+    const link = document.createElement("a");
+    link.target = "_blank";
+    name.appendChild(link);
+    scheduleCellTemplate.appendChild(name);
+
+    // Rooms
+    const rooms = document.createElement("div");
+    rooms.classList.add("schedule_cell_rooms");
+    scheduleCellTemplate.appendChild(rooms);
+
+    // Week
+    const desc = document.createElement("div");
+    desc.classList.add("schedule_cell_desc");
+    scheduleCellTemplate.appendChild(desc);
+
+    // Info
+    const infoDiv = document.createElement("div");
+    infoDiv.classList.add("schedule_cell_info");
+    scheduleCellTemplate.appendChild(infoDiv);
+
+    // Star
+    const starDiv = document.createElement("div");
+    starDiv.classList.add("schedule_cell_star");
+    scheduleCellTemplate.appendChild(starDiv);
+
+    // Bin
+    const binDiv = document.createElement("div");
+    binDiv.classList.add("schedule_cell_bin");
+    scheduleCellTemplate.appendChild(binDiv);
+
+    // Id
+    const idDiv = document.createElement("div");
+    idDiv.classList.add("id");
+    idDiv.classList.add("hidden");
+    scheduleCellTemplate.appendChild(idDiv);
+}
+
+/**
+ * creates new Element representing subject in schedule
+ * @param {string} rooms 
+ * @param {string[]} classes 
+ * @param {number} left 
+ * @param {number} length 
+ * @param {Lesson} les 
+ * @returns 
+ */
+function createScheduleCell(rooms, classes, left, length, les){
+    const scheduleCell = scheduleCellTemplate.cloneNode(true);
+    for(const className of classes){
+        scheduleCell.classList.add(className);
+    }
+    scheduleCell.style.left = `${left}px`;
+    scheduleCell.style.width = `${length}px`;
+
+    const link = scheduleCell.getElementsByClassName("schedule_cell_name")[0].children[0];
+    link.href = "https://www.fit.vut.cz/study/course/" + les.link.split("-")[1];
+    link.innerText = les.name;
+
+    scheduleCell.getElementsByClassName("schedule_cell_rooms")[0].innerText = rooms;
+
+    const desc = scheduleCell.getElementsByClassName("schedule_cell_desc")[0];
+    desc.title = les.week;
+    desc.innerText = les.week;
+
+    const infoDiv = scheduleCell.getElementsByClassName("schedule_cell_info")[0];
+    const info = typeof les.info !== "undefined" ? les.info : "";
+    infoDiv.title = info;
+    infoDiv.innerText = info;
+
+    scheduleCell.getElementsByClassName("id")[0].innerText = les.id;
+    return scheduleCell;
+}
+
+const scheduleLayerTemplate = document.createElement("div");
+scheduleLayerTemplate.classList.add("schedule_row_layer");
+
+
 ///////////////////////////////////// Main /////////////////////////////////////
 async function  main() {
     // Semester radio auto select
@@ -418,89 +573,95 @@ for(const element of document.getElementsByClassName("menu_sem_radio")) {
         searchInputKeyup();
         renderSubjects();
     });
-}    // checked
-$(document).on("click", ".menu_bit_checkbox", function () {
-    searchInputKeyup();
-    renderSubjects();
-}); // checked
-$(document).on("click", ".menu_mit_radio", function () {
-    // Can uncheck
-    if ($(this).hasClass("mit_radio_checked")) {
-        $(".menu_mit_radio").removeClass("mit_radio_checked");
-        $(this).prop("checked", false);
-    } else {
-        $(".menu_mit_radio").removeClass("mit_radio_checked");
-        $(this).addClass("mit_radio_checked");
-    }
+}
+for(const gradeElement of document.getElementsByClassName("menu_grade_checkbox")){
+    gradeElement.addEventListener("click", function () {
+        searchInputKeyup();
+        renderSubjects();
+    });
+}
 
-    searchInputKeyup();
-    renderSubjects();
-}); // checked
-$(document).on("click", ".menu_grade_checkbox", function () {
-    searchInputKeyup();
-    renderSubjects();
-}); // checked
-$(document).on("click", ".menu_sub_checkbox", function () {
-    renderSubjects();
-}); // checked
-$(document).on("click", ".menu_sel_checkbox", function () {
-    renderSubjects();
-}); // checked
 menu_com_search_input.addEventListener("keyup", function () {
-    $("#menu_com_column .menu_column_row").removeClass("hidden_search");
     if (menu_com_search_input.value != "") {
-        $("#menu_com_column .menu_column_row").addClass("hidden_search");
-        $("#menu_com_column .menu_column_row").each(function (i, sub) {
-            if ($(sub).children(".menu_column_row_text").length > 0) {
-                if ($(sub).children(".menu_column_row_text").html().toUpperCase().includes(menu_com_search_input.innerText.toUpperCase())) {
-                    $(sub).removeClass("hidden_search");
-                }
+        for(const element of menu_com_column.getElementsByClassName("menu_column_row")){
+            if(!(
+                element.getElementsByClassName("menu_column_row_text").length > 0
+                && element.getElementsByClassName("menu_column_row_text")[0].innerText.toUpperCase().includes(menu_com_search_input.value.toUpperCase())
+            )){
+                element.classList.add("hidden_search");
             }
-        });
+        }
+    }else{
+        for(const element of menu_com_column.getElementsByClassName("menu_column_row")){
+            element.classList.remove("hidden_search");
+        }
     }
-}); // checked
-$(document).on("keyup", ".menu_opt_search_input", function () {
-    $("#menu_opt_column .menu_column_row").removeClass("hidden_search");
-    if ($(".menu_opt_search_input").prop("value") != "") {
-        $("#menu_opt_column .menu_column_row").addClass("hidden_search");
-        $("#menu_opt_column .menu_column_row").each(function (i, sub) {
-            if ($(sub).children(".menu_column_row_text").length > 0) {
-                if ($(sub).children(".menu_column_row_text").html().toUpperCase().includes($(".menu_opt_search_input").prop("value").toUpperCase())) {
-                    $(sub).removeClass("hidden_search");
-                }
-            }
-        });
-    }
-}); // checked
-$(document).on("click", ".secs_header_elem", function () {
-    $(".secs_header_elem").removeClass("secs_header_elem_selected");
-    $(".sec").addClass("sec_invisible");
+});
 
-    $(this).addClass("secs_header_elem_selected");
-    if ($(this).hasClass("ch_0")) {
-        $(".se_0").removeClass("sec_invisible");
-    } else if ($(this).hasClass("ch_1")) {
-        $(".se_1").removeClass("sec_invisible");
-    } else if ($(this).hasClass("ch_2")) {
-        $(".se_2").removeClass("sec_invisible");
+menu_opt_search_input.addEventListener("keyup", function () {
+    if (menu_opt_search_input.value != "") {
+        for(const element of menu_opt_column.getElementsByClassName("menu_column_row")){
+            if(!(
+                element.getElementsByClassName("menu_column_row_text").length > 0
+                && element.getElementsByClassName("menu_column_row_text")[0].innerText.toUpperCase().includes(menu_opt_search_input.value.toUpperCase())
+            )){
+                element.classList.add("hidden_search");
+            }
+        }
+    }else{
+        for(const element of menu_opt_column.getElementsByClassName("menu_column_row")){
+            element.classList.remove("hidden_search");
+        }
     }
-}); // checked
+});
+{
+    /**
+     * @param {MouseEvent} event 
+     */
+    function router(event){
+        if(event.target.getAttribute("id") === "ch_0"){
+            se_0.classList.remove("sec_invisible");
+            ch_0.classList.add("secs_header_elem_selected");
+        }else{
+            se_0.classList.add("sec_invisible");
+            ch_0.classList.remove("secs_header_elem_selected");
+        }
+        if(event.target.getAttribute("id") === "ch_1"){
+            se_1.classList.remove("sec_invisible");
+            ch_1.classList.add("secs_header_elem_selected");
+        }else{
+            se_1.classList.add("sec_invisible");
+            ch_1.classList.remove("secs_header_elem_selected");
+        }
+        if(event.target.getAttribute("id") === "ch_2"){
+            se_2.classList.remove("sec_invisible");
+            ch_2.classList.add("secs_header_elem_selected");
+        }else{
+            se_2.classList.add("sec_invisible");
+            ch_2.classList.remove("secs_header_elem_selected");
+        }
+    }
+
+    ch_0.addEventListener("click", router);
+    ch_1.addEventListener("click", router);
+    ch_2.addEventListener("click", router);
+}
 
 // Controls
-$(document).on("click", ".menu_submit_button", async function () {
+document.getElementById("menu_submit_button").addEventListener("click", async function () {
     await loadLessons();
     storeLocalStorage();
-}); // checked
-$(document).on("click", ".menu_save_ical_button", function () {
+});
+document.getElementById("menu_save_ical_button").addEventListener("click", function () {
     exportICal();
-}); // checked
-$(document).on("click", ".menu_save_json_button", function () {
+});
+document.getElementById("menu_save_json_button").addEventListener("click", function () {
     downloadJSON();
+});
+document.getElementById("menu_load_json_button").addEventListener("click", function () {
+    document.getElementById("json_load_input").click();
 }); // checked
-$(document).on("click", ".menu_load_json_button", function () {
-    $(".json_load_input").trigger("click");
-}); // checked
-$(document).on("change", ".json_load_input", function () {
+document.getElementById("json_load_input").addEventListener("change", function () {
     loadJSON();
 }); // checked
 
@@ -654,40 +815,38 @@ async function loadData() {
                 }
 
                 // Com
-                // potentially unsafe
-                menu_com_column.innerHTML += `  <div class="menu_column_row mrsub_` + grade + `_` + stud.name + ` hidden">
-                                                    <div class="menu_column_row_text_split">
-                                                        <div class="menu_column_row_text_split_inner">` + name + `</div>
-                                                    </div>
-                                                </div>`;
+                menu_com_column.appendChild(createSubjectGradeSeparator(grade, stud, name))
                 for(const sub of stud.subjects.com[grade]){
-                    /**@type {HTMLDivElement} */
-                    // This is to improve speed
-                    const subjectNode = subjectNodeTemplate.cloneNode(true);
-                    subjectNode.classList.add(`mrsub_${grade}_${stud.name}`);
-                    subjectNode.classList.add(`mrsem_${sub.sem}`);
-                    subjectNode.getElementsByClassName("menu_column_row_checkbox")[0].value = sub.link;
-                    subjectNode.getElementsByClassName("menu_column_row_text")[0].innerText = sub.name;
-                    menu_com_column.appendChild(subjectNode);
+                    menu_com_column.appendChild(createSubjectMenuNode(grade, stud, sub));
                 };
 
                 // Opt
-                // potentially unsafe
-                menu_opt_column.innerHTML += `  <div class="menu_column_row mrsub_` + grade + `_` + stud.name + ` hidden">
-                                                    <div class="menu_column_row_text_split">
-                                                        <div class="menu_column_row_text_split_inner">` + name + `</div>
-                                                    </div>
-                                                </div>`;
+                menu_opt_column.appendChild(createSubjectGradeSeparator(grade, stud, name))
                 for(const sub of stud.subjects.opt[grade]){
-                    const subjectNode = subjectNodeTemplate.cloneNode(true);
-                    subjectNode.classList.add(`mrsub_${grade}_${stud.name}`);
-                    subjectNode.classList.add(`mrsem_${sub.sem}`);
-                    subjectNode.getElementsByClassName("menu_column_row_checkbox")[0].value = sub.link;
-                    subjectNode.getElementsByClassName("menu_column_row_text")[0].innerText = sub.name;
-                    menu_opt_column.appendChild(subjectNode);
+                    menu_opt_column.appendChild(createSubjectMenuNode(grade, stud, sub));
                 };
             }
         }
+
+        document.getElementsByClassName("menu_bit_checkbox")[0]?.addEventListener("click", function () {
+            searchInputKeyup();
+            renderSubjects();
+        });
+
+        for(const button of document.getElementsByClassName("menu_mit_radio")){
+            button.addEventListener("click", function(event){
+                // Can uncheck
+                if (button.classList.contains("mit_radio_checked")) {
+                    button.classList.remove("mit_radio_checked");
+                    button.checked = false;
+                } else {
+                    button.classList.add("mit_radio_checked");
+                }
+
+                searchInputKeyup();
+                renderSubjects();
+            });
+        };
 
         // Done
         header_info_icon.classList.add("hidden");
@@ -706,41 +865,55 @@ async function loadData() {
 }
 
 function renderSubjects() {
-    // Grades render
-    if ($(".menu_bit_checkbox:checked").length > 0) {
-        $(".menu_grade_checkbox[value='0_BIT']").parent().removeClass("hidden");
-        $(".menu_grade_checkbox[value='1_BIT']").parent().removeClass("hidden");
-        $(".menu_grade_checkbox[value='2_BIT']").parent().removeClass("hidden");
-    } else {
-        $(".menu_grade_checkbox[value='0_BIT']").parent().addClass("hidden");
-        $(".menu_grade_checkbox[value='1_BIT']").parent().addClass("hidden");
-        $(".menu_grade_checkbox[value='2_BIT']").parent().addClass("hidden");
+    /**
+     * Test if any class has input checkbox checked
+     * @param {string} className 
+     */
+    function isCheckedAnyClass(className){
+        for(const element of document.getElementsByClassName(className)){
+            if(element.checked === true){
+                return true;
+            }
+        }
+        return false;
     }
-    if ($(".menu_mit_radio:checked").length > 0) {
-        $(".menu_grade_checkbox[value='0_MIT']").parent().removeClass("hidden");
-        $(".menu_grade_checkbox[value='1_MIT']").parent().removeClass("hidden");
+    // Grades render
+    if (isCheckedAnyClass("menu_bit_checkbox")) {
+        for(const element of document.getElementsByClassName("bit_grade")){
+            element.classList.remove("hidden")
+        }
     } else {
-        $(".menu_grade_checkbox[value='0_MIT']").parent().addClass("hidden");
-        $(".menu_grade_checkbox[value='1_MIT']").parent().addClass("hidden");
+        for(const element of document.getElementsByClassName("bit_grade")){
+            element.classList.add("hidden")
+        }
+    }
+    if (isCheckedAnyClass("menu_mit_radio")) {
+        for(const element of document.getElementsByClassName("mit_grade")){
+            element.classList.remove("hidden")
+        }
+    } else {
+        for(const element of document.getElementsByClassName("mit_grade")){
+            element.classList.add("hidden")
+        }
     }
 
     // Render groups
     var groups = [];
     var bitSelected = false;
     var mitSelected = false;
-    $(".menu_grade_checkbox:checked").each(function (i, grade) {
-        if (!$(grade).parent().hasClass("hidden")) {
-            if ($(grade).prop("value").includes("BIT")) {
+    for(const grade of document.querySelectorAll(".menu_grade_checkbox:checked")) {
+        if (!grade.parentElement.classList.contains("hidden")) {
+            if (grade.value.includes("BIT")) {
                 bitSelected = true;
-                groups.push($(grade).prop("value").split("_")[0] + "_" + $(".menu_bit_checkbox:checked").prop("value"));
+                groups.push(grade.value.split("_")[0] + "_" + document.querySelector(".menu_bit_checkbox:checked").value);
             } else {
                 mitSelected = true;
-                groups.push($(grade).prop("value").split("_")[0] + "_" + $(".menu_mit_radio:checked").prop("value"));
+                groups.push(grade.value.split("_")[0] + "_" + document.querySelector(".menu_mit_radio:checked").value);
             }
         }
-    });
+    };
     if (mitSelected) {
-        groups.push("2_" + $(".menu_mit_radio:checked").prop("value"));
+        groups.push("2_" + document.querySelector(".menu_mit_radio:checked").value);
     }
 
     // Searches render
@@ -753,31 +926,43 @@ function renderSubjects() {
     }
 
     // Subjects render
-    $("#menu_com_column .menu_column_row").addClass("hidden");
-    $("#menu_opt_column .menu_column_row").addClass("hidden");
-    $.each(groups, function (i, group) {
-        $(".mrsub_" + group).removeClass("hidden");
+    for(const elem of menu.querySelectorAll("#menu_com_column .menu_column_row")){
+        elem.classList.add("hidden")
+    }
+    for(const elem of menu.querySelectorAll("#menu_opt_column .menu_column_row")){
+        elem.classList.add("hidden")
+    }
+    
+    groups.forEach(function (group) {
+        for(const elem of document.getElementsByClassName("mrsub_" + group)){
+            elem.classList.remove("hidden")
+        }
     })
-    if ($(".menu_sem_radio:checked").prop("value") == "winter") {
-        $(".mrsem_summer").addClass("hidden");
+    if (document.querySelector(".menu_sem_radio:checked").value == "winter") {
+        document.querySelector(".mrsem_summer").classList.add("hidden");
     } else {
-        $(".mrsem_winter").addClass("hidden");
+        document.querySelector(".mrsem_winter").classList.add("hidden");
     }
 
     // Selected render
-    $(".menu_sel_checkbox:not(:checked)").each(function (i, sub) {
-        $(".menu_sub_checkbox[value='" + $(sub).prop("value") + "']").prop("checked", false);
-    });
-    $(".menu_sel_column").html("");
-    $(".menu_sub_checkbox:checked").each(function (o, sub) {
-        if (!$(sub).parent().hasClass("hidden")) {
-            $(".menu_sel_column").append(`  <div class="menu_column_row">
-                                                <input class="menu_column_row_checkbox menu_sel_checkbox" type="checkbox" value="` + $(sub).prop("value") + `" checked="checked">
-                                                <div class="menu_column_row_text">` + $(sub).siblings(".menu_column_row_text").html() + `</div>
+    for(const sub of document.querySelectorAll(".menu_sel_checkbox:not(:checked)")) {
+        document.querySelector(`.menu_sub_checkbox[value='${sub.value}']`).checked = false;
+    };
+    menu_sel_column.innerHTML = "";
+    for(const sub of document.querySelectorAll(".menu_sub_checkbox:checked")) {
+        if (!sub.parentElement.classList.contains("hidden")) {
+            menu_sel_column.innerHTML += `  <div class="menu_column_row">
+                                                <input class="menu_column_row_checkbox menu_sel_checkbox" type="checkbox" value="${sub.value}" checked="checked">
+                                                <div class="menu_column_row_text">${sub.parentElement.getElementsByClassName("menu_column_row_text")[0].innerText}</div>
                                                 <div class="cleaner"></div>
-                                            </div>`);
+                                            </div>`;
         }
-    });
+    };
+    for(const element of menu_sel_column.getElementsByClassName("menu_sel_checkbox")){
+        element.addEventListener("click", function () {
+            renderSubjects();
+        }); // checked
+    }
 } // checked
 
 /////////////////////////////////// Schedule //////////////////////////////////
@@ -1063,96 +1248,92 @@ function renderAll() {
 } // checked
 function renderSchedule() {
     // Push lessons
-    var schedule = [[], [], [], [], []];
-    $.each(lessons, function (i, les) {
+    /** @type {[Lesson[], Lesson[], Lesson[], Lesson[], Lesson[]]} */
+    const schedule = [[], [], [], [], []];
+    for(const les of lessons) {
         // Reinit
         les.layer = 1;
 
+        let collison = false;
         // Collisions
         do {
-            var collison = false;
-            $.each(schedule[les.day], function (o, lesX) {
+            collison = false;
+            for(const lesX of schedule[les.day]){
                 if (les.layer === lesX.layer) {
                     if (doLessonsCollide(les.from, les.to, lesX.from, lesX.to)) {
                         collison = true;
                         les.layer++;
                     }
                 }
-            });
+            }
         } while (collison === true);
 
         // Push
         schedule[les.day].push(les);
-    });
+    }
 
     // Layers count
     var scheduleLayersCount = [1, 1, 1, 1, 1];
     for (d = 0; d < 5; d++) {
         var maxLayer = 1;
-        $.each(schedule[d], function (i, les) {
+        for(const les of schedule[d]){
             if (les.layer > maxLayer) {
                 maxLayer = les.layer;
             }
-        });
+        }
         scheduleLayersCount[d] = maxLayer;
     }
 
     // Prepare schedule rows
+    const rows = scheduleAll.getElementsByClassName("schedule_row");
+    
     for (d = 0; d < 5; d++) {
-        $(".schedule_all").find(".schedule_row").eq(d).children(".schedule_row_layers").html("");
+        // Prepare schedule row
+        const row = rows[d];
+        /**@type {HTMLDivElement} */
+        const layerHolder = row.getElementsByClassName("schedule_row_layers")[0];
+        layerHolder.innerHTML = "";
+        row.getElementsByClassName("schedule_row_header")[0].style.lineHeight = (scheduleLayersCount[d] * 90 + 6) + "px";
+
         for (l = 0; l < scheduleLayersCount[d]; l++) {
-            $(".schedule_all").find(".schedule_row").eq(d).children(".schedule_row_layers").append(`<div class="schedule_row_layer"></div>`);
+            layerHolder.appendChild(scheduleLayerTemplate.cloneNode(true));
         }
 
-        $(".schedule_all").find(".schedule_row").eq(d).children(".schedule_row_header").css("line-height", (scheduleLayersCount[d] * 90 + 6) + "px");
-    }
+        // fill schedule row
+        const fullLength = layerHolder.offsetWidth;
 
-    // Generation of cells
-    for (d = 0; d < 5; d++) {
-        var fullLength = +$(".schedule_all").find(".schedule_row").eq(d).children(".schedule_row_layers").width();
+        for(const les of schedule[d]) {
+            const length = ((les.to - les.from) * (fullLength / 14)) - 6 - 6;
+            const left = (les.from * (fullLength / 14)) + 3;
 
-        $.each(schedule[d], function (i, les) {
-            var length = ((les.to - les.from) * (fullLength / 14)) - 6 - 6;
-            var left = (les.from * (fullLength / 14)) + 3;
-
-            var classes = "";
+            /** @type {string[]} */
+            const classes = [];
             if (les.type === "green") {
-                classes += "schedule_cell_type_green ";
+                classes.push("schedule_cell_type_green");
             } else if (les.type === "blue") {
-                classes += "schedule_cell_type_blue ";
+                classes.push("schedule_cell_type_blue");
             } else if (les.type === "yellow") {
-                classes += "schedule_cell_type_yellow ";
+                classes.push("schedule_cell_type_yellow");
             } else if (les.type === "custom") {
-                classes += "schedule_cell_type_" + les.custom_color + " ";
+                classes.push("schedule_cell_type_" + les.custom_color);
             }
             if (isOddWeek(les.week)) {
-                classes += "schedule_cell_week_odd ";
+                classes.push("schedule_cell_week_odd");
             } else if (isEvenWeek(les.week)) {
-                classes += "schedule_cell_week_even ";
+                classes.push("schedule_cell_week_even");
             }
             if (les.selected === true) {
-                classes += "schedule_cell_selected ";
+                classes.push("schedule_cell_selected");
             }
             if (les.deleted === true) {
-                classes += "schedule_cell_deleted ";
+                classes.push("schedule_cell_deleted");
             }
 
-            var rooms = "";
-            $.each(les.rooms, function (i, room) {
-                rooms += room + " ";
-            });
+            const rooms = les.rooms.join(" ");
 
-            var layerDiv = $(".schedule_all").find(".schedule_row").eq(d).children(".schedule_row_layers").children(".schedule_row_layer").eq(les.layer - 1);
-            $(layerDiv).append(`<div class="schedule_cell ` + classes + `" style="left: ` + left + `px; width: ` + length + `px">
-                                    <div class="schedule_cell_name"><a target="_blank" href="https://www.fit.vut.cz/study/course/` + les.link.split("-")[1] + `">` + les.name + `</a></div>
-                                    <div class="schedule_cell_rooms">` + rooms + `</div>
-                                    <div class="schedule_cell_desc" title="${les.week}">` + les.week + `</div>
-                                    <div class="schedule_cell_info" title="` + (typeof les.info !== "undefined" ? les.info : "") + `">` + (typeof les.info !== "undefined" ? les.info : "") + `</div>
-                                    <div class="schedule_cell_star"></div>
-                                    <div class="schedule_cell_bin"></div>
-                                    <div class="id hidden">` + les.id + `</div>
-                                </div>`);
-        });
+            const layerDiv = layerHolder.children[(les.layer - 1)];
+            layerDiv.appendChild(createScheduleCell(rooms, classes, left, length, les));
+        }
     }
 } // checked
 function renderScheduleFin() {
@@ -1438,12 +1619,12 @@ function loadJSON() {
     }
 
     // No file
-    if (!$(".json_load_input")[0].files[0]) {
+    if (!$("#json_load_input")[0].files[0]) {
         blinkMessage("Nevybrán žádný soubor.");
     }
 
     var reader = new FileReader();
-    reader.readAsText($(".json_load_input")[0].files[0], "UTF-8");
+    reader.readAsText($("#json_load_input")[0].files[0], "UTF-8");
     reader.onload = async function (e) {
         try {
             file = JSON.parse(e.target.result);

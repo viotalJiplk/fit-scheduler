@@ -64,27 +64,27 @@
                             <div class="menu_column">
                                 <div class="menu_column_title">Ročník</div>
                                 <div class="menu_column_conta">
-                                    <div class="menu_column_row hidden">
+                                    <div class="menu_column_row hidden bit_grade">
                                         <input class="menu_column_row_checkbox menu_grade_checkbox" type="checkbox" value="0_BIT">
                                         <div class="menu_column_row_text">1BIT</div>
                                         <div class="cleaner"></div>
                                     </div>
-                                    <div class="menu_column_row hidden">
+                                    <div class="menu_column_row hidden bit_grade">
                                         <input class="menu_column_row_checkbox menu_grade_checkbox" type="checkbox" value="1_BIT">
                                         <div class="menu_column_row_text">2BIT</div>
                                         <div class="cleaner"></div>
                                     </div>
-                                    <div class="menu_column_row hidden">
+                                    <div class="menu_column_row hidden bit_grade">
                                         <input class="menu_column_row_checkbox menu_grade_checkbox" type="checkbox" value="2_BIT">
                                         <div class="menu_column_row_text">3BIT</div>
                                         <div class="cleaner"></div>
                                     </div>
-                                    <div class="menu_column_row hidden">
+                                    <div class="menu_column_row hidden mit_grade">
                                         <input class="menu_column_row_checkbox menu_grade_checkbox" type="checkbox" value="0_MIT">
                                         <div class="menu_column_row_text">1MIT</div>
                                         <div class="cleaner"></div>
                                     </div>
-                                    <div class="menu_column_row hidden">
+                                    <div class="menu_column_row hidden mit_grade">
                                         <input class="menu_column_row_checkbox menu_grade_checkbox" type="checkbox" value="1_MIT">
                                         <div class="menu_column_row_text">2MIT</div>
                                         <div class="cleaner"></div>
@@ -106,27 +106,27 @@
 
                             <div class="menu_column">
                                 <div class="menu_column_title">Vybrané předměty</div>
-                                <div class="menu_column_conta menu_sel_column"></div>
+                                <div id="menu_sel_column" class="menu_column_conta"></div>
                             </div>
                         </div>
 
                         <div class="menu_buttons">
                             <div class="menu_buttons_row">
-                                <input class="menu_button menu_submit_button" type="button" value="Načíst předměty"/>
+                                <input id="menu_submit_button" class="menu_button" type="button" value="Načíst předměty"/>
                                 <div class="cleaner"></div>
                             </div>
                             <div class="menu_buttons_line"></div>
                             <div class="menu_buttons_row">
-                                <input class="menu_button menu_button_half_l menu_save_json_button" type="button" value="Uložit JSON"/>
-                                <input class="menu_button menu_button_half_r menu_load_json_button" type="button" value="Otevřít JSON"/>
+                                <input id="menu_save_json_button" class="menu_button menu_button_half_l" type="button" value="Uložit JSON"/>
+                                <input id="menu_load_json_button" class="menu_button menu_button_half_r" type="button" value="Otevřít JSON"/>
                                 <div class="cleaner"></div>
                             </div>
                             <div class="menu_buttons_row">
-                                <input class="menu_button menu_save_ical_button" type="button" value="Exportovat iCalendar"/>
+                                <input id="menu_save_ical_button" class="menu_button" type="button" value="Exportovat iCalendar"/>
                                 <div class="cleaner"></div>
                             </div>
 
-                            <input class="json_load_input hidden" type="file" name="json_load_input"/>
+                            <input id="json_load_input" class="hidden" type="file" name="json_load_input"/>
                         </div>
 
 
@@ -148,15 +148,15 @@
                 <div id="secs" class="hidden">
                     <div id="secs_main">
                         <div class="secs_header">
-                            <div class="secs_header_elem secs_header_elem_selected ch_0">Pracovní rozvrh</div>
-                            <div class="secs_header_elem ch_1">Výsledný rozvrh</div>
-                            <div class="secs_header_elem secs_header_elem_oneword ch_2">Rozsahy</div>
+                            <div id="ch_0" class="secs_header_elem secs_header_elem_selected">Pracovní rozvrh</div>
+                            <div id="ch_1" class="secs_header_elem">Výsledný rozvrh</div>
+                            <div id="ch_2" class="secs_header_elem secs_header_elem_oneword">Rozsahy</div>
                             <div class="cleaner"></div>
                         </div>
 
                         <div class="secs_conta">
-                            <div class="sec se_0">
-                                <div class="schedule schedule_all">
+                            <div id="se_0" class="sec">
+                                <div id="schedule_all" class="schedule">
                                     <div class="schedule_header">
                                         <div class="schedule_header_cell_week"></div>
                                         <div class="schedule_header_cell_divider"></div>
@@ -340,7 +340,7 @@
                                 </div>
                             </div>
 
-                            <div class="sec se_1 sec_invisible">
+                            <div id="se_1" class="sec sec_invisible">
                                 <div class="schedule schedule_fin">
                                     <div class="schedule_header">
                                         <div class="schedule_header_cell_week"></div>
@@ -402,7 +402,7 @@
                                 </div>
                             </div>
 
-                            <div class="sec se_2 sec_invisible">
+                            <div id="se_2" class="sec sec_invisible">
                                 <div class="ranges"></div>
                             </div>
                         </div>
