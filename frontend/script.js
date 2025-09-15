@@ -341,7 +341,24 @@ const ch_2 = document.getElementById("ch_2");
 const schedule_all = document.getElementById("schedule_all");
 /**@type {HTMLDivElement} */
 const schedule_fin = document.getElementById("schedule_fin");
-
+/**@type {HTMLInputElement} */
+const lesson_add_card_name = document.getElementById("lesson_add_card_name");
+/**@type {HTMLSelectElement} */
+const lesson_add_card_day = document.getElementById("lesson_add_card_day");
+/**@type {HTMLInputElement} */
+const lesson_add_card_week = document.getElementById("lesson_add_card_week");
+/**@type {HTMLSelectElement} */
+const lesson_add_card_from = document.getElementById("lesson_add_card_from");
+/**@type {HTMLSelectElement} */
+const lesson_add_card_to = document.getElementById("lesson_add_card_to");
+/**@type {HTMLSelectElement} */
+const lesson_add_card_color = document.getElementById("lesson_add_card_color");
+/**@type {HTMLInputElement} */
+const lesson_add_card_room = document.getElementById("lesson_add_card_room");
+/**@type {HTMLInputElement} */
+const lesson_add_card_info = document.getElementById("lesson_add_card_info");
+/**@type {HTMLDivElement} */
+const loading_message = document.getElementById("loading_message");
 
 ///////////////////////////////////// Node Templates ///////////////////////////
 
@@ -486,6 +503,35 @@ function createScheduleCell(rooms, classes, left, length, les){
     link.innerText = les.name;
 
     scheduleCell.getElementsByClassName("schedule_cell_rooms")[0].innerText = rooms;
+
+    const starDiv = scheduleCell.getElementsByClassName("schedule_cell_star")[0];
+    starDiv.addEventListener("click", function(){
+        // Update
+        if (les.selected === true) {
+            les.selected = false;
+        } else {
+            les.selected = true;
+        }
+
+        // Render
+        storeLocalStorage();
+        renderAll();
+    });
+
+    
+    const binDiv = scheduleCell.getElementsByClassName("schedule_cell_bin")[0];
+    binDiv.addEventListener("click", function(){
+        // Update
+        if (les.deleted === true) {
+            les.deleted = false;
+        } else {
+            les.deleted = true;
+        }
+
+        // Render
+        storeLocalStorage();
+        renderAll();
+    });
 
     const desc = scheduleCell.getElementsByClassName("schedule_cell_desc")[0];
     desc.title = les.week;
@@ -670,50 +716,21 @@ document.getElementById("json_load_input").addEventListener("change", function (
 }); // checked
 
 // Schedule
-$(document).on("click", ".schedule_cell_star", function () {
-    // Update
-    var les = lessons.find(x => x.id === $(this).siblings(".id").html());
-    if (les.selected === true) {
-        les.selected = false;
-    } else {
-        les.selected = true;
-    }
 
-    // Render
-    storeLocalStorage();
-    renderAll();
-}); // checked
-$(document).on("click", ".schedule_cell_bin", function () {
-    // Update
-    var les = lessons.find(x => x.id === $(this).siblings(".id").html());
-    if (les.type === "custom") {
-        lessons = lessons.filter(x => x.id !== $(this).siblings(".id").html());
-    } else {
-        if (les.deleted === true) {
-            les.deleted = false;
-        } else {
-            les.deleted = true;
-        }
-    }
-
-    // Render
-    storeLocalStorage();
-    renderAll();
-}); // checked
-$(document).on("click", ".lesson_add_card_button", function () {
+document.getElementById("lesson_add_card_button").addEventListener("click", function () {
     // New lesson
     let lesson = parseLesson({
         "id": "CUST_" + makeHash("custom" + Date.now()),
-        "name": $(".lesson_add_card_name").val(),
-        "link": "0-" + $(".lesson_add_card_name").val(),
-        "day": +$(".lesson_add_card_day").val(),
-        "week": $(".lesson_add_card_week").val(),
-        "from": +$(".lesson_add_card_from").val(),
-        "to": +$(".lesson_add_card_to").val(),
+        "name": lesson_add_card_name.value,
+        "link": "0-" + lesson_add_card_name.value,
+        "day": +(lesson_add_card_day.value),
+        "week": lesson_add_card_week.value,
+        "from": +(lesson_add_card_from.value),
+        "to": +(lesson_add_card_to.value),
         "type": "custom",
-        "custom_color": $(".lesson_add_card_color").val(),
-        "rooms": [$(".lesson_add_card_room").val()],
-        "info": $(".lesson_add_card_info").val(),
+        "custom_color": lesson_add_card_color.value,
+        "rooms": [lesson_add_card_room.value],
+        "info": lesson_add_card_info.value,
         "layer": 1,
         "selected": false,
         "deleted": false
@@ -737,13 +754,13 @@ $(document).on("click", ".lesson_add_card_button", function () {
 }); // checked
 
 ///////////////////////////////////// Menu /////////////////////////////////////
-function showMessage(text) {
-    $(".loading_message").removeClass("hidden");
-    $(".loading_message").html("Načítám data...");
+function showMessage(text="Načítám data...") {
+    loading_message.classList.remove("hidden");
+    loading_message.innerText = text;
 }
 function hideMessage() {
-    $(".loading_message").html("");
-    $(".loading_message").addClass("hidden");
+    loading_message.innerText = "";
+    loading_message.classList.add("hidden");
 }
 
 async function loadData() {
@@ -1139,18 +1156,21 @@ async function loadLessons() {
     }
 }
 
+/**
+ * @param {Lesson[]} lessons 
+ */
 function mergeLessons(lessons) {
-    var lesson = lessons[0];
+    const lesson = lessons[0];
 
     var rooms = [];
     var lecturers = [];
     var weeks = [];
 
-    $.each(lessons, function (i, l) {
+    for(const l of lessons) {
         rooms = rooms.concat(l.rooms);
         lecturers = lecturers.concat(l.info.split(", "));
         weeks = weeks.concat(l.week.split(" "));
-    });
+    }
 
     // Remove duplicates
     rooms = rooms.filter(function (item, pos) {
@@ -1175,25 +1195,26 @@ function mergeLessons(lessons) {
     return lesson;
 } // checked
 function renderAll() {
-    // Disect
-    var lessonsDisection = {};
-    $.each(lessons, function (i, lesson) {
-        // we disect the lessons into groups of possibly same lessons
+    // Dissect
+    /** @type {Object.<string, Lesson[]>} */
+    const lessonsDissections = {};
+    for(const lesson of lessons) {
+        // we dissect the lessons into groups of possibly same lessons
         // the lessons differ only in the week and the room and the lecturer -> probably the same lesson
         // the cases when the lessons are possibly different:
         // - !!! the lessons are in different rooms -> unnecessary detail for planing, not preventing merge
         // - the lessons are in different weeks -> the lessons are different, the merge will be prevented
         // - the lessons are from different lecturers -> probably the same lessons with just the change of lecturer, not preventing merge
         var key = lesson.name + ";" + lesson.day + ";" + lesson.from + ";" + lesson.to + ";" + lesson.type;
-        if (typeof lessonsDisection[key] == "undefined") {
-            lessonsDisection[key] = [];
+        if (typeof lessonsDissections[key] == "undefined") {
+            lessonsDissections[key] = [];
         }
-        lessonsDisection[key].push(lesson);
-    });
+        lessonsDissections[key].push(lesson);
+    }
 
     // Merge
     lessons = [];
-    $.each(lessonsDisection, function (i, lessonsDisection) {
+    for(const key in lessonsDissections) {
         // the assumption:
         // - the otherLessons is non-empty:
         //   -> this means that there is no split of the lessons into odd and even weeks
@@ -1202,9 +1223,10 @@ function renderAll() {
         //   -> this means that there is a split of the lessons into odd and even weeks
         //   -> we merge even with even and odd with odd lessons
         //   (NOTE - TODO?) maybe this split is incidental and it should be merged into one lesson - for example green
-        var oddLessons = lessonsDisection.filter(x => isOddWeek(x.week, 1));
-        var evenLessons = lessonsDisection.filter(x => isEvenWeek(x.week, 1));
-        var otherLessons = lessonsDisection.filter(x => !isOddWeek(x.week, 1) && !isEvenWeek(x.week, 1));
+        const lessonsDissection = lessonsDissections[key];
+        var oddLessons = lessonsDissection.filter(x => isOddWeek(x.week, 1));
+        var evenLessons = lessonsDissection.filter(x => isEvenWeek(x.week, 1));
+        var otherLessons = lessonsDissection.filter(x => !isOddWeek(x.week, 1) && !isEvenWeek(x.week, 1));
 
         if (otherLessons.length > 0) {
             lessons.push(mergeLessons(otherLessons.concat(oddLessons).concat(evenLessons)));
@@ -1216,11 +1238,11 @@ function renderAll() {
                 lessons.push(mergeLessons(evenLessons));
             }
         }
-    });
+    }
 
-    $.each(lessons, function (i, lesson) {
+    for(const lesson of lessons) {
         lesson.week = lesson.week.replaceAll("1. 2. 3. 4. 5. 6. 7. 8. 9. 10. 11. 12. 13.", "");
-    });
+    }
 
     // Sort
     lessons.sort(function (a, b) {
@@ -1356,6 +1378,7 @@ function renderScheduleFin() {
     });
     renderAnySchedule(schedule_fin, lessonsToRender);   
 }
+
 function renderRanges() {
     $(".ranges").html("");
     $.each(ranges, function (i, rang) {

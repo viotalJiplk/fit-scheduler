@@ -675,7 +675,7 @@ html, body, * {
                         color: #aaa;
                     }
 
-        .loading_message {
+        #loading_message {
             float: left;
             line-height: 70px;
             padding-left: 30px;
@@ -689,7 +689,7 @@ html, body, * {
             padding-top: 0;
             margin: 0 auto;
         }
-            .lesson_add_card {
+            #lesson_add_card {
                 width: calc(100% - 40px - 10px - 2px);
                 max-width: 300px;
                 margin: 10px 0;
@@ -743,7 +743,7 @@ html, body, * {
                         background-color: #ffffff;
                     }
 
-                .lesson_add_card_button {
+                #lesson_add_card_button {
                     display: block;
                     width: 100%;
                     height: 30px;
@@ -757,10 +757,10 @@ html, body, * {
                     font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
                     cursor: pointer;
                 }
-                .lesson_add_card_button:hover {
+                #lesson_add_card_button:hover {
                     background-color: #04AD00;
                 }
-                .lesson_add_card_button:active {
+                #lesson_add_card_button:active {
                     margin-top: 7px;
                     height: 28px;
                     border-bottom-width: 2px;
@@ -817,7 +817,7 @@ code {
             line-height: 21px;
         }
 
-    .loading_message {
+    #loading_message {
         font-size: 16px;
     }
 }
