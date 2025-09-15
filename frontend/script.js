@@ -210,26 +210,26 @@ class SubRange {
      * @param {number|undefined} greenCount
      * @param {number|undefined} greenLength
      * @param {number} greenRange
+     * @param {number|undefined} yellowCount
+     * @param {number|undefined} yellowLength
+     * @param {number} yellowRange
      * @param {string} link
      * @param {string} name
      * @param {string} raw
-     * @param {number} yellowRange
-     * @param {number|undefined} yellowCount
-     * @param {number|undefined} yellowLength
      */
-    constructor(blueCount, blueLength, blueRange, greenCount, greenLength, greenRange, link, name, raw, yellowRange, yellowCount, yellowLength) {
+    constructor(blueCount, blueLength, blueRange, greenCount, greenLength, greenRange, yellowCount, yellowLength, yellowRange, link, name, raw) {
         this.blueCount = blueCount;
         this.blueLength = blueLength;
         this.blueRange = blueRange;
         this.greenCount = greenCount;
         this.greenLength = greenLength;
         this.greenRange = greenRange;
-        this.link = link;
-        this.name = name;
-        this.raw = raw;
         this.yellowRange = yellowRange;
         this.yellowCount = yellowCount;
         this.yellowLength = yellowLength;
+        this.link = link;
+        this.name = name;
+        this.raw = raw;
     }
 }
 
@@ -246,14 +246,14 @@ function parseSubRange(object) {
         &&(("greenCount" in object && typeof object.greenCount === "number") || (object.greenCount === undefined))
         &&(("greenLength" in object && typeof object.greenLength === "number") || (object.greenLength === undefined))
         &&("greenRange" in object && typeof object.greenRange === "number")
+        &&(("yellowCount" in object && typeof object.yellowCount === "number") || (object.yellowCount === undefined))
+        &&(("yellowLength" in object && typeof object.yellowLength === "number") || (object.yellowLength === undefined))
+        &&("yellowRange" in object && typeof object.yellowRange === "number")
         &&("link" in object && typeof object.link === "string")
         &&("name" in object && typeof object.name === "string")
         &&("raw" in object && typeof object.raw === "string")
-        &&("yellowRange" in object && typeof object.yellowRange === "number")
-        &&(("yellowLength" in object && typeof object.yellowLength === "number") || (object.yellowLength === undefined))
-        &&(("yellowRange" in object && typeof object.yellowRange === "number") || (object.yellowRange === undefined))
     ) {
-        return new SubRange(object.blueCount, object.blueLength, object.blueRange, object.greenCount, object.greenLength, object.greenRange, object.link, object.name, object.raw, object.yellowRange, object.yellowCount, object.yellowRange);
+        return new SubRange(object.blueCount, object.blueLength, object.blueRange, object.greenCount, object.greenLength, object.greenRange, object.yellowCount, object.yellowLength, object.yellowRange, object.link, object.name, object.raw);
     } else {
         throw new Error("Range missing params or params are wrong type");
     }
@@ -359,6 +359,11 @@ const lesson_add_card_room = document.getElementById("lesson_add_card_room");
 const lesson_add_card_info = document.getElementById("lesson_add_card_info");
 /**@type {HTMLDivElement} */
 const loading_message = document.getElementById("loading_message");
+/**@type {HTMLDivElement} */
+const rangesElement = document.getElementById("ranges");
+/**@type {HTMLInputElement} */
+const json_load_input = document.getElementById("json_load_input");
+
 
 ///////////////////////////////////// Node Templates ///////////////////////////
 
@@ -672,6 +677,7 @@ menu_opt_search_input.addEventListener("keyup", function () {
         if(event.target.getAttribute("id") === "ch_0"){
             se_0.classList.remove("sec_invisible");
             ch_0.classList.add("secs_header_elem_selected");
+            renderSchedule();
         }else{
             se_0.classList.add("sec_invisible");
             ch_0.classList.remove("secs_header_elem_selected");
@@ -679,6 +685,7 @@ menu_opt_search_input.addEventListener("keyup", function () {
         if(event.target.getAttribute("id") === "ch_1"){
             se_1.classList.remove("sec_invisible");
             ch_1.classList.add("secs_header_elem_selected");
+            renderScheduleFin();
         }else{
             se_1.classList.add("sec_invisible");
             ch_1.classList.remove("secs_header_elem_selected");
@@ -709,11 +716,11 @@ document.getElementById("menu_save_json_button").addEventListener("click", funct
     downloadJSON();
 });
 document.getElementById("menu_load_json_button").addEventListener("click", function () {
-    document.getElementById("json_load_input").click();
-}); // checked
-document.getElementById("json_load_input").addEventListener("change", function () {
+    json_load_input.click();
+});
+json_load_input.addEventListener("change", function () {
     loadJSON();
-}); // checked
+});
 
 // Schedule
 
@@ -1085,6 +1092,8 @@ async function loadLessons() {
         // Parse JSON response
         const data = await response.json();
 
+        ranges = []
+
         for(const rangeObject of data.ranges){
             ranges.push(parseSubRange(rangeObject))
         }
@@ -1380,23 +1389,23 @@ function renderScheduleFin() {
 }
 
 function renderRanges() {
-    $(".ranges").html("");
-    $.each(ranges, function (i, rang) {
+    rangesElement.innerHTML = "";
+    for(const rang of ranges){
         // Sum values
         var sumGreenValue = 0;
         var sumBlueValue = 0;
         var sumYellowValue = 0;
-        $.each(lessons.filter(x => x.name == rang.name && x.selected === true && x.type == "green"), function (o, les) {
+        for(const les of lessons.filter(x => x.name == rang.name && x.selected === true && x.type == "green")){
             sumGreenValue += les.to - les.from;
-        });
-        $.each(lessons.filter(x => x.name == rang.name && x.selected === true && x.type == "blue"), function (o, les) {
+        }
+        for(const les of lessons.filter(x => x.name == rang.name && x.selected === true && x.type == "blue")){
             sumBlueValue += les.to - les.from;
-        });
-        $.each(lessons.filter(x => x.name == rang.name && x.selected === true && x.type == "yellow"), function (o, les) {
+        }
+        for(const les of lessons.filter(x => x.name == rang.name && x.selected === true && x.type == "yellow")){
             sumYellowValue += les.to - les.from;
-        });
+        }
 
-        $(".ranges").append(`   <div class="range">
+        rangesElement.innerHTML += `   <div class="range">
                                     <a target="_blank" href="https://www.fit.vut.cz/study/course/` + rang.link.split("-")[1] + `">
                                         <div class="range_name">` + rang.name + `</div>
                                     </a>
@@ -1458,9 +1467,9 @@ function renderRanges() {
                                         </div>
                                     </div>
                                     <div class="cleaner"></div>
-                                </div>`);
-    });
-} // checked
+                                </div>`
+    }
+}
 
 //////////////////////////////////// SAVING ////////////////////////////////////
 function makeFile() {
@@ -1468,7 +1477,7 @@ function makeFile() {
     file.custom = [];
     file.selected = [];
     file.deleted = [];
-    $.each(lessons, function (i, les) {
+    for(const les of lessons) {
         if (les.type === "custom") {
             file.custom.push(les);
         }
@@ -1478,8 +1487,8 @@ function makeFile() {
         if (les.deleted) {
             file.deleted.push(les.id);
         }
-    });
-} // checked
+    }
+}
 async function restoreFile() {
     // Year
     if (file.year) {
@@ -1488,38 +1497,35 @@ async function restoreFile() {
     }
 
     // Sem
-    $(".menu_sem_radio[value='" + file.sem + "']").prop("checked", true);
+    document.querySelector(".menu_sem_radio[value='" + file.sem + "']").checked = true;
 
     // Study
-    $(".menu_bit_checkbox").prop("checked", false);
-    $(".menu_mit_radio").prop("checked", false);
-    $.each(file.studies, function (i, stud) {
-        $(".menu_bit_checkbox[value='" + stud + "']").prop("checked", true);
-        $(".menu_mit_radio[value='" + stud + "']").prop("checked", true);
-    });
+    document.getElementsByClassName("menu_bit_checkbox")[0].checked = file.studies.includes("BIT");
+    for(const mitCheckbox of document.getElementsByClassName("menu_mit_radio")){
+        mitCheckbox.checked = file.studies.includes(mitCheckbox.value);
+    }
 
     // Grades
-    $(".menu_grade_checkbox").prop("checked", false);
-    $.each(file.grades, function (i, grade) {
-        $(".menu_grade_checkbox[value='" + grade + "']").prop("checked", true);
-    });
+    for(const gradeCheckbox of document.getElementsByClassName("menu_grade_checkbox")){
+        gradeCheckbox.checked = file.grades.includes(gradeCheckbox.value);
+    }
 
     // Subjects
-    $(".menu_sub_checkbox").prop("checked", false);
-    $("#menu_com_column .menu_column_row").each(function (i, sub) {
-        if ($(sub).children(".menu_column_row_text").length > 0) {
-            if (file.subjects.includes($(sub).children(".menu_column_row_text").html())) {
-                $(sub).children(".menu_sub_checkbox").prop("checked", true);
+    for(const subject of document.getElementById("menu_com_column").getElementsByClassName("menu_column_row")){
+        if(subject.getElementsByClassName("menu_column_row_text").length > 0){
+            if(file.subjects.includes(subject.getElementsByClassName("menu_column_row_text")[0].innerText)){
+                subject.getElementsByClassName("menu_sub_checkbox")[0].checked = true;
             }
         }
-    });
-    $("#menu_opt_column .menu_column_row").each(function (i, sub) {
-        if ($(sub).children(".menu_column_row_text").length > 0) {
-            if (file.subjects.includes($(sub).children(".menu_column_row_text").html())) {
-                $(sub).children(".menu_sub_checkbox").prop("checked", true);
+    }
+    
+    for(const subject of document.getElementById("menu_opt_column").getElementsByClassName("menu_column_row")){
+        if(subject.getElementsByClassName("menu_column_row_text").length > 0){
+            if(file.subjects.includes(subject.getElementsByClassName("menu_column_row_text")[0].innerText)){
+                subject.getElementsByClassName("menu_sub_checkbox")[0].checked = true;
             }
         }
-    });
+    }
 
     // Menu
     searchInputKeyup();
@@ -1529,19 +1535,19 @@ async function restoreFile() {
     await loadLessons();
     
     // Lessons
-    $.each(file.custom, function (i, les) {
+    for(const les of file.custom){
         lessons.push(les);
-    });
-    $.each(file.selected, function (i, les) {
+    }
+    for(const les of file.selected){
         if (typeof lessons.find(x => x.id === les) != "undefined") {
             lessons.find(x => x.id === les).selected = true;
         }
-    });
-    $.each(file.deleted, function (i, les) {
+    }
+    for(const les of file.deleted){
         if (typeof lessons.find(x => x.id === les) != "undefined") {
             lessons.find(x => x.id === les).deleted = true;
         }
-    });
+    }
     renderAll();
 } // checked
 
@@ -1563,24 +1569,26 @@ function loadJSON() {
     function blinkMessage(text) {
         secs.classList.add("hidden");
         showMessage("Nevybrán žádný soubor.");
-        $(".menu_button").prop("disabled", true);
-        $(".menu_button").addClass("menu_button_disabled");
+        for(const menuButton of document.getElementsByName("menu_button")){
+            menuButton.disabled = true;
+            menuButton.classList.add("menu_button_disabled");
+        }
 
         setTimeout(function () {
             hideMessage();
             secs.classList.remove("hidden");
-            $(".menu_button").prop("disabled", false);
-            $(".menu_button").removeClass("menu_button_disabled");
+            menuButton.disabled = false;
+            menuButton.classList.remove("menu_button_disabled");
         }, 2000);
     }
 
     // No file
-    if (!$("#json_load_input")[0].files[0]) {
+    if (!(json_load_input.files[0])) {
         blinkMessage("Nevybrán žádný soubor.");
     }
 
     var reader = new FileReader();
-    reader.readAsText($("#json_load_input")[0].files[0], "UTF-8");
+    reader.readAsText(json_load_input.files[0], "UTF-8");
     reader.onload = async function (e) {
         try {
             file = JSON.parse(e.target.result);

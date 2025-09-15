@@ -5,6 +5,11 @@ html, body, * {
     font-weight: 400;
 }
 
+body{
+    width: 100vw;
+    height: 100vh;
+}
+
 .conta {
     width: 100%;
     height: 100%;
@@ -55,7 +60,7 @@ html, body, * {
             #header_info_icon {
                 background-image: url(./img/info.png);
             }
-            .header_cross_icon {
+            #header_cross_icon {
                 background-image: url(./img/cross.png);
             }
 
@@ -325,8 +330,8 @@ html, body, * {
                     overflow: hidden;
                 }
                     .sec {
-                        position: absolute;
-                        top: 0;
+                        /* position: absolute;
+                        top: 0; */
                         left: 0;
                         width: 100%;
                         height: calc(100% - 10px);
@@ -334,7 +339,7 @@ html, body, * {
                         overflow: auto;
                         scrollbar-width: thin;
                     }
-                        .ranges {
+                        #ranges {
                             width: calc(100% - 40px);
                             padding: 0 20px;
                             padding-bottom: 30px;
@@ -785,7 +790,7 @@ code {
     display: none;
 }
 .sec_invisible {
-    left: -100%;
+    display: none;
 }
 .secs_menu_hidden {
     width: 100%;
