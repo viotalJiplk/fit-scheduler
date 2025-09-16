@@ -967,9 +967,13 @@ function renderSubjects() {
         }
     })
     if (document.querySelector(".menu_sem_radio:checked").value == "winter") {
-        document.querySelector(".mrsem_summer").classList.add("hidden");
+        for(const subject of document.getElementsByClassName("mrsem_summer")){
+            subject.classList.add("hidden");
+        }
     } else {
-        document.querySelector(".mrsem_winter").classList.add("hidden");
+        for(const subject of document.getElementsByClassName("mrsem_winter")){
+            subject.classList.add("hidden");
+        }
     }
 
     // Selected render
